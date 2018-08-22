@@ -46,6 +46,26 @@
                 "isLeader": false,                
             },
         ],
+        
+// 选择人员左树模拟数据
+addPackGoodsModal: {
+        title: '选择站点',
+        visible: false,
+        treeData: [{ // 关键
+            id: 1,
+            allotName: 'zlMES测试',
+            allotId: 5140713,
+            childs: [{
+                productionLineNo: "001",
+                productionLineName: "生产线1号",
+            }, {
+                productionLineNo: "002",
+                productionLineName: "生产线2号",
+            }],
+        }],
+        listData: [],
+    },
+    
 // 工作站点模拟数据
 worksiteData: [
         {
