@@ -1,45 +1,43 @@
 {
-	// Place your global snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and 
-	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope 
-	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is 
-	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are: 
-	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. 
-	// Placeholders with the same ids are connected.
+	// Place your snippets for javascriptreact here. Each snippet is defined under a snippet name and has a prefix, body and 
+	// description. The prefix is what is used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. Placeholders with the 
+	// same ids are connected.
 	// Example:
-	"react-redux-ajax-action.type": {
-		"scope": "",
-		"prefix": "react-redux-ajax-action.type",
+	"Print to console": {
+		"prefix": "cg",
 		"body": [
-			"// 获取仓库列表",
-			"export const ${1: WORK_SITE}_${2: GET}_HOUSE_LIST_START = '${1: WORK_SITE}_${2: GET} >> house list start'",
-			"export const ${1: WORK_SITE}_${2: GET}_HOUSE_LIST_SUCCESS = '${1: WORK_SITE}_${2: GET} >> house list success'",
-			"export const ${1: WORK_SITE}_${2: GET}_HOUSE_LIST_FAIL = '${1: WORK_SITE}_${2: GET} >> house list fail'",
+			"console.log('我要打印了=====>>>>', $1);",
+			"$2"
 		],
-		"description": "UPPERCASE way to define the action type name"
+		"description": "my console"
 	},
-	"react-redux-ajax-store": {
-		"scope": "",
-		"prefix": "react-redux-ajax-store",
+	"Pause to debuuger": {
+		"prefix": "db",
 		"body": [
-			"// 获取仓库列表",
-			"[${1: WORK_SITE}_${2: GET}_HOUSE_LIST_START]: ($$state) => {",
+			"debugger"
+		],
+		"description": "debug the code and result"
+	},
+	"react-redux-ajax": {
+		"prefix": "rra-react-redux-ajax",
+		"body": [
+			"// ${1: 获取仓库列表}",
+			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET}_START = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${4:''} start'",
+			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET}_SUCCESS = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${4:''} success'",
+			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET}_FAIL = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${4:''} fail'",
+			"// ${1: 获取仓库列表}",
+			"[${4:MES3_}${5:WORK_SITE}_${6:GET}_START]: ($$state) => {",
 			"    return $$state.set('loading', true)",
 			"},",
-			"[${1: WORK_SITE}_${2: GET}_HOUSE_LIST_SUCCESS]: ($$state, action) => {",
+			"[${4:MES3_}${5:WORK_SITE}_${6:GET}_SUCCESS]: ($$state, action) => {",
 			"    return $$state.set('loading', false).merge({ ${4: keyname}: action.payload })",
 			"},",
-			"[${1: WORK_SITE}_${2: GET}_HOUSE_LIST_FAIL]: ($$state) => {",
+			"[${4:MES3_}${5:WORK_SITE}_${6:GET}_FAIL]: ($$state) => {",
 			"    return $$state.set('loading', false)",
 			"},",
-		],
-		"description": "UPPERCASE way to define the action type name"
-	},
-	"react-redux-ajax-action.payload": {
-		"scope": "",
-		"prefix": "react-redux-ajax-action.payload",
-		"body": [
-			"// 获取仓库列表",
-			"export const ${4: WORK_SITE}List = createAction(${1: WORK_SITE}_${2: GET}_HOUSE_LIST_START, async (opts) => {",
+			"// ${1: 获取仓库列表}",
+			"export const ${4: workSite}List = createAction(${4:MES3_}${5:WORK_SITE}_${6:GET}_START, async (opts) => {",
 			"    await axios.post(urlWMS, {",
 			"        service: wms_SERVICE,",
 			"        method: wms_getHouseUrl,",
@@ -49,23 +47,71 @@
 			"        if (res.success) {",
 			"            const data = JSON.parse(res.data)",
 			"            dispatch({",
-			"                type: ${1: WORK_SITE}_${2: GET}_HOUSE_LIST_SUCCESS,",
+			"                type: ${4:MES3_}${5:WORK_SITE}_${6:GET}_SUCCESS,",
 			"                payload: data.records,",
 			"            })",
 			"        } else {",
 			"            dispatch({",
-			"                type: ${1: WORK_SITE}_${2: GET}_HOUSE_LIST_FAIL,",
+			"                type: ${4:MES3_}${5:WORK_SITE}_${6:GET}_FAIL,",
 			"            })",
 			"            message.warning(res.msg)",
 			"        }",
-			"   }).catch(() => {",
+			"    }).catch(() => {",
 			"        dispatch({",
-			"            type: ${1: WORK_SITE}_${2: GET}_HOUSE_LIST_FAIL,",
+			"            type: ${4:MES3_}${5:WORK_SITE}_${6:GET}_FAIL,",
 			"        })",
 			"        message.warning('请求出错!~')",
-			"   })",
+			"    })",
 			"})",
+
 		],
-		"description": "create the action to get the ajax rst as action's payload to modify the store"
+		"description": "React react-redux's ajax: define variable, define action and modify the store "
 	},
+	"react-redux-store-widthout-ajax": {
+		"prefix": "!rra-not-react-redux-ajax",
+		"body": [
+			"// ${1:暂存数据}",
+			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET} = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> start'",
+			"// ${1:暂存数据}",
+			"[${4:MES3_}${5:WORK_SITE}_${6:GET}]: ($$state) => {",
+			"    return $$state.set('loading', true)",
+			"},",
+			"// ${1:暂存数据}",
+			"export const ${7: workSite}List = createAction(${4:MES3_}${5:WORK_SITE}_${6:GET}_START, (opts) => opts)",
+		],
+		"description": "change the react redux store without ajax request"
+	},
+	"react-redux-connect": {
+		"prefix": "rrc",
+		"body": [
+			"import React, { Component } from 'react'",
+			"import { connect } from 'react-redux'",
+			"import {",
+			"    viewModalClose,",
+			"} from '../../../state/productionPlan'",
+			"function mapStateToProps(store) {",
+			"    return {",
+			"        user: store.user.toJS(),",
+			"        viewModal: store.mes3_productionPlan.get('viewModal').toJS(),",
+			"        viewModalItems: store.mes3_productionPlan.get('viewModalItems').toJS(),",
+			"    }",
+			"}",
+			"function mapDispatchToProps(dispatch) {",
+			"    return {",
+			"        viewModalClose: (opts) => { dispatch(viewModalClose(opts)) },",
+			"    }",
+			"}",
+			"@connect(mapStateToProps, mapDispatchToProps)",
+			"export default class ViewOrderTable extends Component {",
+    		"    constructor(props) {",
+			"        super(props)",
+			"    }",
+			"    render () {",
+			"        'xxx'",	
+			"    }",
+			"}"
+		],
+		"description": "connect react-redux with component"
+	},
+	
 }
