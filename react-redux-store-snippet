@@ -23,29 +23,29 @@
 		"prefix": "rra-react-redux-ajax",
 		"body": [
 			"// ${1: 获取仓库列表}",
-			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET}_START = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${4:''} start'",
-			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET}_SUCCESS = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${4:''} success'",
-			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET}_FAIL = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${4:''} fail'",
+			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET}_START = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${9: action desc} start'",
+			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET}_SUCCESS = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${9:''} action desc'",
+			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET}_FAIL = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${9:''} fail'",
 			"// ${1: 获取仓库列表}",
 			"[${4:MES3_}${5:WORK_SITE}_${6:GET}_START]: ($$state) => {",
 			"    return $$state.set('loading', true)",
 			"},",
 			"[${4:MES3_}${5:WORK_SITE}_${6:GET}_SUCCESS]: ($$state, action) => {",
-			"    return $$state.set('loading', false).merge({ ${4: keyname}: action.payload })",
+			"    return $$state.set('loading', false)",
 			"},",
 			"[${4:MES3_}${5:WORK_SITE}_${6:GET}_FAIL]: ($$state) => {",
 			"    return $$state.set('loading', false)",
 			"},",
 			"// ${1: 获取仓库列表}",
-			"export const ${4: workSite}List = createAction(${4:MES3_}${5:WORK_SITE}_${6:GET}_START, async (opts) => {",
-			"    await axios.post(urlWMS, {",
-			"        service: wms_SERVICE,",
-			"        method: wms_getHouseUrl,",
+			"export const ${9:ActionModuleContent} = createAction(${4:MES3_}${5:WORK_SITE}_${6:GET}_START, async (opts) => {",
+			"    await axios.post(url, {",
+			"        service: service_MES3,",
+			"        method: getHouseUrl,",
 			"        type: 'post',",
 			"        data: opts,",
 			"    }).then((res) => {",
 			"        if (res.success) {",
-			"            const data = JSON.parse(res.data)",
+			"            const data = res.data",
 			"            dispatch({",
 			"                type: ${4:MES3_}${5:WORK_SITE}_${6:GET}_SUCCESS,",
 			"                payload: data.records,",
@@ -56,14 +56,14 @@
 			"            })",
 			"            message.warning(res.msg)",
 			"        }",
-			"    }).catch(() => {",
+			"    }).catch((err) => {",
+			"        console.log('err', err)",
 			"        dispatch({",
 			"            type: ${4:MES3_}${5:WORK_SITE}_${6:GET}_FAIL,",
 			"        })",
 			"        message.warning('请求出错!~')",
 			"    })",
 			"})",
-
 		],
 		"description": "React react-redux's ajax: define variable, define action and modify the store "
 	},
@@ -71,18 +71,18 @@
 		"prefix": "!rra-not-react-redux-ajax",
 		"body": [
 			"// ${1:暂存数据}",
-			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET} = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> start'",
+			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET} = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${8:open}'",
 			"// ${1:暂存数据}",
 			"[${4:MES3_}${5:WORK_SITE}_${6:GET}]: ($$state) => {",
 			"    return $$state.set('loading', true)",
 			"},",
 			"// ${1:暂存数据}",
-			"export const ${7: workSite}List = createAction(${4:MES3_}${5:WORK_SITE}_${6:GET}_START, (opts) => opts)",
+			"export const ${10:workSite}${11:Get} = createAction(${4:MES3_}${5:WORK_SITE}_${6:GET}, (opts) => opts)",
 		],
 		"description": "change the react redux store without ajax request"
 	},
 	"react-redux-connect": {
-		"prefix": "rrc",
+		"prefix": "rrc-connect redux width component",
 		"body": [
 			"import React, { Component } from 'react'",
 			"import { connect } from 'react-redux'",
@@ -106,12 +106,75 @@
     		"    constructor(props) {",
 			"        super(props)",
 			"    }",
-			"    render () {",
-			"        'xxx'",	
+			"    render() {",
+			"        return ('xxx')",	
 			"    }",
 			"}"
 		],
 		"description": "connect react-redux with component"
 	},
-	
+	"react-redux-mapStateToProps": {
+		"prefix": "rrs-State-mapStateToProps",
+		"body": [
+			"${3:records}: store.mes3_${7:productionPlan}.toJS().${3:records},",
+		],
+		"description": "connect react-redux's store with component's props"
+	},
+	"react-redux-mapDispathToProps": {
+		"prefix": "rrd-Dispatch-mapDispatchToProps",
+		"body": [
+			"${3:addEditModalOpen}: (opts) => { dispatch(${3:addEditModalOpen}(opts)) },"
+		],
+		"description": "connect react-redux's action with component's props"
+	},
+	"react-redux-action: dispath-ajax-results": {
+		"prefix": "rrdr",
+		"body": [
+			"dispatch({",
+			"    type: ${3:MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_SUCCESS},",
+			"    payload: ${4: modalManualRecordGoodsList},",
+			"    })",
+		],
+		"description": "dispath react-redux's action's ajax's results to hide loaing or receive the ajax results"
+	},
+	"react-redux-action: dispath-another-action": {
+		"prefix": "rrda",
+		"body": [
+			"dispatch(${0:actionModuleDetail})",
+		],
+		"description": "dispath react-redux's another action in an action"
+	},
+	"import-moment: import moment": {
+		"prefix": "imoment",
+		"body": [
+			"import moment from 'moment'",
+			"import 'moment/locale/zh-cn'",
+		],
+		"description": "import moment.js lib"
+	},
+	"import-excel: import moment": {
+		"prefix": "iexcel",
+		"body": [
+			"import { mes3ExportExcel } from '../../../util'",
+		],
+		"description": "import moment.js lib"
+	},
+	"react action: react action tip before excuting": {
+		"prefix": "ratip-react action tip",
+		"body": [
+			"const self = this",
+			"Modal.confirm({",
+			"    title: `确定要删除吗?`,",
+			"    content: (<div>",
+			"        <p>您将删除生产计划{record.produceBillNo}吗？</p>",
+			"        <p style={{ color: '#aeaeae' }}>删除是不可恢复操作，请慎重考虑~</p>",
+			"        </div>),",
+			"    onOk() {",
+			"        self._deleteProductionPlan(record)",
+			"    },",
+			"    onCancel () {},",
+			"})",
+		],
+		"description": "react action: react action tip before excuting"
+	},        
 }
