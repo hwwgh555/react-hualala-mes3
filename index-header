@@ -1,0 +1,196 @@
+// 2018-08-27 生产计划单: 头部 by huangwenwu
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { Col, Icon, DatePicker, Button, Select, Tooltip, Input, Dropdown, Menu } from 'antd'
+import moment from 'moment'
+import 'moment/locale/zh-cn'
+import { mes3ExportExcel } from '../../../util'
+
+import {
+    queryWorkPersonalList,
+    addEditModalOpen,
+    saveSearchParams,
+    queryProductionPlanList,
+} from '../../../state/productionPlan'
+
+import {
+    exportWorkPeraonalUrl,
+} from '../../../constants/serviceUrl'
+
+const Option = Select.Option
+const { RangePicker } = DatePicker
+const dateFormat = 'YYYY-MM-DD'
+
+function mapStateToProps(store) {
+    return {
+        user: store.user.toJS(),
+        tableData: store.mes3_productionPlan.toJS().tableData,
+        searchParams: store.mes3_productionPlan.toJS().searchParams,
+        allotList: store.mes3_productionPlan.toJS().allotList,
+    }
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        queryProductionPlanList: (opts) => { dispatch(queryProductionPlanList(opts)) },
+        saveSearchParams: (opts) => { dispatch(saveSearchParams(opts)) },
+        addEditModalOpen: (opts) => { dispatch(addEditModalOpen(opts)) },
+    }
+}
+@connect(mapStateToProps, mapDispatchToProps)
+export default class ProductionPlanHeader extends Component {
+    constructor(props) {
+        super(props)
+    }
+    componentDidMount() {
+
+    }
+    openAddModal = (modalName) => {
+        const mapTable = {
+            'manualModal': {
+                title: '手动填制计划单',
+            },
+            'queryModal': {
+                title: '订单和安全库存到计划单',
+            },
+        }
+        this.props.addEditModalOpen({
+            name: modalName,
+            action: 'add',
+            title: mapTable[modalName].title,
+        })
+    }
+    onDateChange = (date, dateString, keyName) => {
+        let postDateString = dateString.replace(/-/g, '')
+        this._saveSearchParams(keyName, postDateString)
+    }
+    onSelectChange = (value = '', keyName) => {
+        this._saveSearchParams(keyName, value)
+    }
+    _saveSearchParams = (keyName, value) => {
+        const { saveSearchParams } = this.props
+        saveSearchParams({ keyName, value })
+    }
+    render() {
+        const { user, searchParams, tableData, allotList } = this.props
+        const menu = (
+            <Menu>
+                <Menu.Item>
+                    <a href="#" onClick={() => this.openAddModal('manualModal')}>手动填制</a>
+                </Menu.Item>
+                <Menu.Item>
+                    <a href="#" onClick={() => this.openAddModal('queryModal')}>订单和安全库存</a>                    
+                </Menu.Item>
+            </Menu>
+        )
+        return (
+            <Col span={24} className="layoutsHeader">
+                <div className="layoutsTool">
+                    <div className="layoutsToolLeft">
+                        <h1>生产计划单</h1>
+                    </div>
+                    <div className="layoutsToolRight">
+                        <ul>
+                            <li>
+                                <Dropdown overlay={menu} placement="bottomLeft">
+                                    <Button
+                                        type="ghost"                                    
+                                    >
+                                        <Icon type="plus" />新增计划单
+                                    </Button>
+                                </Dropdown>
+                            </li>
+                            <li>
+                                {/* TODO: */}
+                                <Button
+                                    onClick={() => {
+                                        mes3ExportExcel({
+                                            method: exportWorkPeraonalUrl,
+                                            exportId: 'mes3ProductionPlan',
+                                            params: {
+                                                groupId: user.accountInfo.groupID,
+                                                exportId: 'mes3ProductionPlan',
+                                                ...searchParams,
+                                                pageNum: tableData.pageInfo.pageNum,
+                                                pageSize: tableData.pageInfo.pageSize,
+                                            },
+                                        })
+                                        return null
+                                    }}
+                                    type="ghost"
+                                >
+                                    <Icon type="export" />导出
+                                </Button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div className="layoutsLine"></div>
+                <div className="layoutsSearch">
+                    <ul>
+                        <li>
+                            <h5>单据日期</h5>
+                        </li>
+                        <li>
+                            <DatePicker
+                                defaultValue={moment(new Date(), dateFormat)}
+                                format={dateFormat}
+                                onChange={(date, dateString) => {
+                                    this.onDateChange(date, dateString, 'startDate')
+                                }}
+                            />
+                        </li>
+                        <li>
+                            <h5>-</h5>
+                        </li>
+                        <li>
+                            <DatePicker
+                                defaultValue={moment(new Date(), dateFormat)}
+                                format={dateFormat}
+                                onChange={(date, dateString) => {
+                                    this.onDateChange(date, dateString, 'endDate')
+                                }}
+                            />
+                        </li>
+                        <li>
+                            <h5>加工间</h5>
+                        </li>
+                        <li>
+                            <Select
+                                allowClear={true}
+                                style={{ width: 160 }}
+                                placeholder="请选择加工间"
+                                onChange={(id) => {
+                                    this.onSelectChange(id, 'allotId')
+                                }}
+                            >
+                                <Option key={''} value={''}>全部</Option>
+                                {allotList && allotList.map((item) => {
+                                    return (
+                                        <Option key={item.orgID} value={item.orgID}>
+                                            {item.orgName}
+                                        </Option>
+                                    )
+                                })}
+                            </Select>
+                        </li>
+                        <li>
+                            <Button
+                                onClick={() => {
+                                    this.props.queryProductionPlanList({
+                                        pageNum: 1,
+                                        pageSize: tableData.pageInfo.pageSize,
+                                        groupId: user.accountInfo.groupID,
+                                        distributionId: user.orgID,
+                                        ...searchParams,
+                                    })
+                                }}
+                                type="primary"
+                            ><Icon type="search" />查询</Button>
+                        </li>
+                    </ul>
+                </div>
+            </Col>
+        )
+    }
+}
