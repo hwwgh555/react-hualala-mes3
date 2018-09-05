@@ -1,0 +1,365 @@
+// 2018-08-27 生产计划单: main table  by huangwenwu
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { Table, Tooltip, Modal } from 'antd'
+import { formatTime } from './util.js'
+
+import {
+    queryProductionPlanList,
+    getProductionPlanViewDetail,
+    auditProductionPlan,
+    deleteProductionPlan,
+    addEditModalOpen,
+    initModalManualEdit,
+    initModalQueryEdit,
+} from '../../../state/productionPlan'
+
+const confirm = Modal.confirm
+const error = Modal.error
+
+function mapStateToProps(store) {
+    return {
+        user: store.user.toJS(),
+        tableData: store.mes3_productionPlan.toJS().tableData,
+        searchParams: store.mes3_productionPlan.toJS().searchParams,
+    }
+}
+function mapDispatchToProps(dispatch) {
+    return {
+        queryProductionPlanList: (opts) => { dispatch(queryProductionPlanList(opts)) },        
+        getProductionPlanViewDetail: (opts, cb) => { dispatch(getProductionPlanViewDetail(opts, cb)) },
+        auditProductionPlan: (opts) => { dispatch(auditProductionPlan(opts)) },
+        deleteProductionPlan: (opts) => { dispatch(deleteProductionPlan(opts)) },
+        addEditModalOpen: (opts) => { dispatch(addEditModalOpen(opts)) },
+        initModalManualEdit: (opts) => { dispatch(initModalManualEdit(opts)) },
+        initModalQueryEdit: (opts) => { dispatch(initModalQueryEdit(opts)) },
+    }
+}
+@connect(mapStateToProps, mapDispatchToProps)
+export default class ProductionPlanTable extends Component {
+    constructor(props) {
+        super(props)
+        this.columns = [{
+            title: '序号',
+            dataIndex: 'index',
+            fixed: 'left',
+            width: 50,
+            className: 'TableTxtCenter',
+            render: (text, record, index) => {
+                return (
+                    <span>{index + 1}</span>
+                )
+            },
+        }, {
+            title: '操作',
+            dataIndex: 'operation',
+            fixed: 'left',
+            width: 150,
+            className: 'TableTxtLeft',            
+            render: (text, record) => {
+                return (
+                    <div>
+                        <a href="#" onClick={() => this.onViewOrderDetail(record)}>查看</a>                        
+                        {record.produceBillStatus === 0 ?
+                            (
+                                <span>
+                                    <a href="#" onClick={() => this.onAudit(record)}>审核</a>
+                                    <a href="#" onClick={() => this.onEdit(record)}>编辑</a>
+                                    <a href="#" onClick={() => this.onDelete(record)}>删除</a>
+                                </span>
+                            ) : null
+                        }
+                    </div>
+                )
+            },
+        }, {
+            title: '加工计划单号',
+            dataIndex: 'produceBillNo',
+            fixed: 'left',
+            width: 120,
+            className: 'TableTxtLeft',
+            render: (text) => {
+                return (
+                    <Tooltip placement="topLeft" title={text}>
+                        {text}
+                    </Tooltip>
+                )
+ 
+            },
+        }, {
+            title: '单据日期',
+            dataIndex: 'produceBillDate', // 是制单时间吗?
+            fixed: 'left',
+            width: 100,
+            className: 'TableTxtLeft',
+            render: (text) => {
+                return (
+                    <Tooltip placement="top" title={text}>
+                        {formatTime(text, false)}
+                    </Tooltip>
+                )
+            },
+        }, {
+            title: '加工间',
+            dataIndex: 'allotName',
+            className: 'TableTxtCenter',
+            width: 200,
+            render: (text) => {
+                return (<Tooltip placement="top" title={text}>
+                    {text}
+                </Tooltip>)
+            },
+        }, {
+            title: '状态', // to do
+            dataIndex: 'produceBillStatus',
+            width: 20,
+            className: 'TableTxtCenter',
+            render: (text) => {
+                return (
+                    <Tooltip placement="top" title={text === 0 ? '未审核' : '已审核'}>
+                        {text === 0 ? '未审核' : '已审核'}
+                    </Tooltip>
+                )
+            },
+        }, {
+            title: '制单人/制单时间', // createBy createTime 
+            dataIndex: 'createByAndTime',
+            width: 200,
+            className: 'TableTxtLeft',
+            render: (text) => {
+                return (
+                    <Tooltip placement="topLeft" title={text}>
+                        {text}
+                    </Tooltip>
+                )
+            },
+        }, {
+            title: '审核人/审核时间', //auditBy auditTime
+            dataIndex: 'auditByAndTime',
+            width: 200,            
+            className: 'TableTxtLeft',
+            render: (text, record, index) => {
+                return (
+                    <Tooltip 
+                        placement="topLeft"
+                        title={
+                            record.produceBillStatus === 0 ?
+                                '未审核' 
+                                : 
+                                text
+                        }>
+                        {record.produceBillStatus === 0 ? '未审核' : text}
+                    </Tooltip>
+                )
+            },
+        }, {
+            title: '来源', //auditBy auditTime
+            dataIndex: 'source',
+            className: 'TableTxtLeft',
+            render: (text) => {
+                let computedText = (text === 0 ? '手工填制' : '订单和安全库存')
+                return (
+                    <Tooltip placement="topLeft" title={computedText}>
+                        {computedText}
+                    </Tooltip>
+                )
+            },
+        }]
+    }
+    onViewOrderDetail = (record) => {
+        const { user, getProductionPlanViewDetail } = this.props
+        const opts = {
+            postData: {
+                groupId: user.accountInfo.groupID,
+                produceBillNo: record.produceBillNo,
+            },
+            desc: {
+                produceBillDate: record.produceBillDate,
+                allotName: record.allotName,
+                createBy: record.createBy,
+                createTime: record.createTime,
+            },
+        }
+        getProductionPlanViewDetail(opts)
+    }
+    onAudit = (record ) => {
+        const { user, auditProductionPlan } = this.props
+        const postData = {
+            groupId: user.accountInfo.groupID,
+            distributionId: user.orgID,
+            allotId: record.allotId,
+            id: record.id,
+            produceBillNo: record.produceBillNo,
+        }
+        const query = this._getPlanListQueryParams()
+        auditProductionPlan({
+            postData,
+            query,
+        })
+    }
+    onDelete = (record) => {
+        const self = this
+        Modal.confirm({
+            title: `确定要删除吗?`,
+            content: (<div>
+                <p>您将删除生产计划{record.produceBillNo}吗？</p>
+                <p style={{ color: '#aeaeae' }}>删除是不可恢复操作，请慎重考虑~</p>
+            </div>),
+            onOk() {
+                self._deleteProductionPlan(record)
+            },
+            onCancel () {},
+        })
+    }
+    onEdit = (record) => {
+        // 计划单详情  ajax 手动:1.生产加工间 2.日期初始化 3.表格列表
+        // 打开模态框
+        const {
+            user,
+            initModalManualEdit,
+        } = this.props
+        const detailData = {
+            post: {
+                groupId: user.accountInfo.groupID,
+                produceBillNo: record.produceBillNo,
+            },
+            cover: {
+                allotId: record.allotId,
+                produceBillDate: record.produceBillDate,
+            },
+            editOnly: {
+                produceBillNo: record.produceBillNo,
+                produceBillStatus: record.produceBillStatus,
+                id: record.id,
+            },
+        }
+        // 模态框数据
+        const source = record.source
+        const mapTable = {
+            0: {
+                title: '编辑手动填制计划单',
+                name: 'manualModal',
+            },
+            1: {
+                title: '编辑订单和安全库存到计划单',
+                name: 'queryModal',
+            },
+        }
+        const modalData = {
+            action: 'edit',
+            ... mapTable[source],
+        }
+        // 查询品项列表 参数
+        const goodsData = {
+            demandID: record.allotId, // 加工间id
+            distributionID: user.orgID,
+            groupID: user.accountInfo.groupID,
+            isActive: 1,
+            isProcesed: 1,
+            pageSize: "-1",
+            searchKey: '', // 模糊搜索
+        }
+        if (mapTable[source].name === 'manualModal') {
+            initModalManualEdit({
+                detailData,
+                modalData,
+                goodsData,
+            })
+        }
+        if (mapTable[source].name === 'queryModal') {
+            const { user, initModalQueryEdit } = this.props
+            detailData.editOnly.produceBillDate	= record.produceBillDate
+            detailData.editOnly.allotId = record.allotId
+            detailData.editOnly.allotName = record.allotName           
+            
+            detailData.desc = {
+                produceBillDate: record.produceBillDate,
+                allotName: record.allotName,
+                createBy: record.createBy,
+                createTime: record.createTime,
+            }
+            delete detailData.cover
+            initModalQueryEdit({
+                detailData,
+                modalData,
+            })
+        }
+    }
+    // 切换每页显示条数
+    onShowSizeChange = (current, pageSize) => {
+        this.props.queryProductionPlanList({
+            groupId: this.props.user.accountInfo.groupID,
+            distributionId: this.props.user.orgID,
+            ...this.props.searchParams,
+            pageNum: current,
+            pageSize,
+        })
+    }
+    onFlip = (page, pageSize) => {
+        this.props.queryProductionPlanList({
+            groupId: this.props.user.accountInfo.groupID,
+            distributionId: this.props.user.orgID,
+            ...this.props.searchParams,
+            pageNum: page,
+            pageSize,
+        })
+    }
+    _getPlanListQueryParams = () => {
+        // snippet TODO:
+        const { user, tableData, searchParams} = this.props
+        const query = {
+            groupId: user.accountInfo.groupID,
+            distributionId: user.orgID,
+            ... searchParams,
+            pageNum: tableData.pageInfo.pageNum,
+            pageSize: tableData.pageInfo.pageSize,
+        }
+        return query
+    }
+    _deleteProductionPlan = (record) => {
+        const { user, deleteProductionPlan } = this.props
+        const postData = {
+            groupId: user.accountInfo.groupID,
+            id: record.id,
+            produceBillNo: record.produceBillNo,
+        }
+        const query = this._getPlanListQueryParams()
+        deleteProductionPlan({
+            postData,
+            query,
+        })
+    }
+    render() {
+        const { tableData: {pageInfo, records}  } = this.props
+        // console.log('records', records)
+        const computedRecords = records && records.map(record => {
+            return {
+                key: record.id,
+                createByAndTime: record.createBy + '/' + formatTime(record.createTime, true),
+                auditByAndTime: record.auditBy + '/' + formatTime(record.auditTime, true),
+                ... record,
+            }
+        })
+        return (
+            <div>
+                <Table
+                    bordered={true}
+                    style={{ maxWidth: 1040 }}
+                    scroll={{ x: 1020, y: this.props.tableHeight }}
+                    columns={this.columns}
+                    dataSource={computedRecords}
+                    pagination={{
+                        pageSize: pageInfo ? pageInfo.pageSize : 20,
+                        current: pageInfo ? pageInfo.pageNum : 1,
+                        showQuickJumper: true,
+                        showSizeChanger: true,
+                        onShowSizeChange: this.onShowSizeChange,
+                        onChange: this.onFlip,
+                        total: pageInfo ? pageInfo.total : 0,
+                        showTotal: (total, range) => `本页 ${range[0]}-${range[1]} / 共 ${total} 条`,
+                    }}
+                />
+            </div>
+        )
+    }
+}
