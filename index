@@ -1,0 +1,98 @@
+// 2018-08-27 生产计划单入口 by huangwenwu
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { dispatch } from '@hualala/platform-base/lib';
+import { Row, Col } from 'antd'
+import Loading from '../../Common/Loading'
+import { onWindowResize } from '../../../util'
+import ProductionPlanHeader from './Header'
+import ProductionPlanTable from './HeaderTable'
+import AddEditModalQuery from './AddEditModalQuery'
+import AddEditModalQueryEdit from './AddEditModalQueryEdit'
+import AddEditModalManual from './AddEditModalManual'
+import ViewOrderModal from './ViewModal'
+import registePage from '../../../index'
+import { MES3_PRODUCTIONPLAN } from '../../../constants/entryCodes'
+import moment from 'moment'
+import 'moment/locale/zh-cn'
+
+import mes3_productionPlan,{
+    unmount,
+    initRequests,
+} from '../../../state/productionPlan'
+
+const mapStateToProps = (store) => {
+    return {
+        user: store.user.toJS(),
+        loading: store.mes3_productionPlan.get('loading'),
+    }
+}
+const mapDispatchToProps = () => {
+    return {
+        unmount: (opts) => { dispatch(unmount(opts)) },
+        initRequests: (opts) => { dispatch(initRequests(opts)) },  
+    }
+}
+@registePage(MES3_PRODUCTIONPLAN, { mes3_productionPlan })
+@connect(mapStateToProps, mapDispatchToProps)
+export default class ProductionPlan extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            tableHeight: '',
+        }
+    }
+    componentDidMount() {
+        this.resize()
+        window.addEventListener('resize', this.resize)
+        const { 
+            user, 
+            initRequests,
+        } = this.props
+        //加工间列表参数
+        const allotParams = {
+            groupID: user.accountInfo.groupID,
+            distributionId: user.orgID,
+            orgTypeID: 9,
+        }
+        //查询生产计划表参数
+        const planParams = {
+            allotId: '',
+            distributionId: user.orgID,
+            endDate: moment().format('YYYYMMDD'),
+            groupId: user.accountInfo.groupID,            
+            pageNum: 1,
+            pageSize: 20,
+            startDate: moment().format('YYYYMMDD'),            
+        }
+        this.props.initRequests({
+            allotParams,
+            planParams,
+        })
+    }
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.resize)
+        this.props.unmount()
+    }
+    resize = () => {
+        this.setState({
+            tableHeight: onWindowResize(this.dom, 115),
+        })
+    }
+    render() {
+        return (
+            <Row className="layoutsContainer" ref={(container) => { this.dom = container }}>
+                <Loading loading={this.props.loading} />
+                <ProductionPlanHeader />
+                <Col span={24} className="layoutsLineBlock"></Col>
+                <Col span={24} className="layoutsContent tableClass">
+                    <ProductionPlanTable />
+                </Col>
+                <AddEditModalQuery />
+                <AddEditModalQueryEdit />
+                <AddEditModalManual />
+                <ViewOrderModal />
+            </Row>
+        )
+    }
+}
