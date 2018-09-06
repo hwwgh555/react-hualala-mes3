@@ -1,931 +1,187 @@
-// 2018-08-27 生产计划单管理 huangwenwu
-import { axios, createAction, handleActions, dispatch } from '@hualala/platform-base'
-import Immutable from 'immutable'
-import { message } from 'antd'
-import moment from 'moment'
-import 'moment/locale/zh-cn'
-import {
-    service_MES3,
-    service_MES,
-    service_SC,
-    url,
-    getOrgUrl,
-    queryProductionPlanListUrl,
-    queryProductionPlanDetailUrl,
-    queryModalQueryGoodsUrl,
-    submitNewModalQueryProductionPlanUrl,
-    delQueryModalProductionPlanUrl,
-    queryModalManualGoodsUrl,
-    createProdcutionPlanUrl,
-    auditProductionPlanUrl,
-    delProductionPlanUrl,
-    updateProductionPlanUrl,
-} from '../constants/serviceUrl'
-
-import { modalQueryTableRecords, modalManualAddTableRecords } from '../components/ProductionManagement/ProductionPlan/mock.js'
-
-let initDate = moment().format('YYYYMMDD')
-const initialState = {
-    loading: false,
-    allotList: [], // 加工间列表
-    searchParams: { // 搜索查询的数据
-        allotId: null,
-        startDate: initDate,
-        endDate: initDate,
-    },
-    tableData: { // 主表:生产计划单表格信息
-        pageInfo: {
-            pageNum: null,
-            pageSize: null,
-            pages: null,
-            total: null,
-        },
-        records:[],
-    },
-    queryModal: { // 查询添加模态框
-        visible: false,
-        title: '',
-        type: '',
-    },
-    modalQueryCreatePlanParams: {
-        allotId: '',
-    },
-    manualModal: { // 手动添加模态框
-        visible: false,
-        title: '',
-        type: '',
-    },
-    modalManualAddTableRecords: [],
-    modalManualRecordGoodsList: [], // 品项选择列表
-    modalManualCreatePlanParams: {
-        allotId: '', // 查询品项的加工间
-        produceBillDate: initDate, // 生成时的单据日期
-    },
-    modalManualEditOnly: { // 编辑保存时,所特有的
-        produceBillNo: '',
-        produceBillStatus: '',
-    },
-    modalQueryTableRecords: [],
-    modalQueryEdit: {
-        title: '',
-        visible: false,
-    },
-    modalQueryEditOnly: { // 编辑保存时,所特有的
-        produceBillNo: '',
-        produceBillStatus: '',
-    },
-    modalQueryDesc: {
-        produceBillDate: '',
-        allotName: '',
-        createBy: '',
-        createTime: '',
-    },
-    viewModal: {
-        visible: false,
-        title: '查看生产计划单',
-    },
-    viewModalData: {
-        items: [],
-        desc: {
-            produceBillDate: '',
-            allotName: '',
-            createBy: '',
-            createTime: '',
-        },
-    },
+{
+	// Place your snippets for javascriptreact here. Each snippet is defined under a snippet name and has a prefix, body and 
+	// description. The prefix is what is used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. Placeholders with the 
+	// same ids are connected.
+	// Example:
+	"Print to console": {
+		"prefix": "csl",
+		"body": [
+			"console.log('我要打印了=====>>>>', $1);",
+			"$2"
+		],
+		"description": "my console"
+	},
+	"Pause to debuuger": {
+		"prefix": "db",
+		"body": [
+			"debugger"
+		],
+		"description": "debug the code and result"
+	},
+	"react-redux-ajax": {
+		"prefix": "rra-react-redux-ajax",
+		"body": [
+			"// ${1: 获取仓库列表}",
+			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET}_START = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${9: action desc} start'",
+			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET}_SUCCESS = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${9:''} action desc'",
+			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET}_FAIL = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${9:''} fail'",
+			"// ${1: 获取仓库列表}",
+			"[${4:MES3_}${5:WORK_SITE}_${6:GET}_START]: ($$state) => {",
+			"    return $$state.set('loading', true)",
+			"},",
+			"[${4:MES3_}${5:WORK_SITE}_${6:GET}_SUCCESS]: ($$state, action) => {",
+			"    return $$state.set('loading', false)",
+			"},",
+			"[${4:MES3_}${5:WORK_SITE}_${6:GET}_FAIL]: ($$state) => {",
+			"    return $$state.set('loading', false)",
+			"},",
+			"// ${1: 获取仓库列表}",
+			"export const ${9:ActionModuleContent} = createAction(${4:MES3_}${5:WORK_SITE}_${6:GET}_START, async (opts) => {",
+			"    await axios.post(url, {",
+			"        service: service_MES3,",
+			"        method: getHouseUrl,",
+			"        type: 'post',",
+			"        data: opts,",
+			"    }).then((res) => {",
+			"        if (res.success) {",
+			"            let data = res.data",
+			"            if (Object.prototype.toString.call(data.records).slice(8, -1) !== 'Array') {",
+			"                data.records = []",
+			"            }",
+			"            dispatch({",
+			"                type: ${4:MES3_}${5:WORK_SITE}_${6:GET}_SUCCESS,",
+			"                payload: data.records,",
+			"            })",
+			"        } else {",
+			"            dispatch({",
+			"                type: ${4:MES3_}${5:WORK_SITE}_${6:GET}_FAIL,",
+			"            })",
+			"            if (typeof res.message === 'string') {",
+			"                message.warning(res.message)",
+			"            } else {",
+			"                message.warning('xx出错!')",
+			"            }",
+			"        }",
+			"    }).catch((err) => {",
+			"        console.log('err', err)",
+			"        dispatch({",
+			"            type: ${4:MES3_}${5:WORK_SITE}_${6:GET}_FAIL,",
+			"        })",
+			"        message.warning('请求出错!~')",
+			"    })",
+			"})",
+		],
+		"description": "React react-redux's ajax: define variable, define action and modify the store "
+	},
+	"react-redux-store-widthout-ajax": {
+		"prefix": "!rra-not-react-redux-ajax",
+		"body": [
+			"// ${1:暂存数据}",
+			"export const ${4:MES3_}${5:WORK_SITE}_${6:GET} = '${4:MES3_}${5:WORK_SITE}_${6:GET} >> ${8:open}'",
+			"// ${1:暂存数据}",
+			"[${4:MES3_}${5:WORK_SITE}_${6:GET}]: ($$state) => {",
+			"    return $$state.set('loading', true)",
+			"},",
+			"// ${1:暂存数据}",
+			"export const ${10:workSite}${11:Get} = createAction(${4:MES3_}${5:WORK_SITE}_${6:GET}, (opts) => opts)",
+		],
+		"description": "change the react redux store without ajax request"
+	},
+	"react-redux-connect": {
+		"prefix": "rrc-connect redux width component",
+		"body": [
+			"import React, { Component } from 'react'",
+			"import { connect } from 'react-redux'",
+			"import {",
+			"    viewModalClose,",
+			"} from '../../../state/productionPlan'",
+			"function mapStateToProps(store) {",
+			"    return {",
+			"        user: store.user.toJS(),",
+			"        viewModal: store.mes3_productionPlan.get('viewModal').toJS(),",
+			"        viewModalItems: store.mes3_productionPlan.get('viewModalItems').toJS(),",
+			"    }",
+			"}",
+			"function mapDispatchToProps(dispatch) {",
+			"    return {",
+			"        viewModalClose: (opts) => { dispatch(viewModalClose(opts)) },",
+			"    }",
+			"}",
+			"@connect(mapStateToProps, mapDispatchToProps)",
+			"export default class ViewOrderTable extends Component {",
+    		"    constructor(props) {",
+			"        super(props)",
+			"    }",
+			"    render() {",
+			"        return ('xxx')",	
+			"    }",
+			"}"
+		],
+		"description": "connect react-redux with component"
+	},
+	"react-redux-mapStateToProps": {
+		"prefix": "rrs-State-mapStateToProps",
+		"body": [
+			"${3:records}: store.mes3_${7:productionPlan}.toJS().${3:records},",
+		],
+		"description": "connect react-redux's store with component's props"
+	},
+	"react-redux-mapDispathToProps": {
+		"prefix": "rrd-Dispatch-mapDispatchToProps",
+		"body": [
+			"${3:addEditModalOpen}: (opts) => { dispatch(${3:addEditModalOpen}(opts)) },"
+		],
+		"description": "connect react-redux's action with component's props"
+	},
+	"react-redux-action: dispath-ajax-results": {
+		"prefix": "rrdr",
+		"body": [
+			"dispatch({",
+			"    type: ${3:MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_SUCCESS},",
+			"    payload: ${4: modalManualRecordGoodsList},",
+			"    })",
+		],
+		"description": "dispath react-redux's action's ajax's results to hide loaing or receive the ajax results"
+	},
+	"react-redux-action: dispath-another-action": {
+		"prefix": "rrda",
+		"body": [
+			"dispatch(${0:actionModuleDetail})",
+		],
+		"description": "dispath react-redux's another action in an action"
+	},
+	"import-moment: import moment": {
+		"prefix": "imoment",
+		"body": [
+			"import moment from 'moment'",
+			"import 'moment/locale/zh-cn'",
+		],
+		"description": "import moment.js lib"
+	},
+	"import-excel: import moment": {
+		"prefix": "iexcel",
+		"body": [
+			"import { mes3ExportExcel } from '../../../util'",
+		],
+		"description": "import moment.js lib"
+	},
+	"react action: react action tip before excuting": {
+		"prefix": "ratip-react action tip",
+		"body": [
+			"const self = this",
+			"Modal.confirm({",
+			"    title: `确定要删除吗?`,",
+			"    content: (<div>",
+			"        <p>您将删除生产计划{record.produceBillNo}吗？</p>",
+			"        <p style={{ color: '#aeaeae' }}>删除是不可恢复操作，请慎重考虑~</p>",
+			"        </div>),",
+			"    onOk() {",
+			"        self._deleteProductionPlan(record)",
+			"    },",
+			"    onCancel () {},",
+			"})",
+		],
+		"description": "react action: react action tip before excuting"
+	},        
 }
-
-// unmount
-export const MES3_RPODUCTION_PLAN_UNMOUNT = 'mes3 >> production plan unmount'
-
-// 初始化远程请求
-export const MES3_PRODUCTION_PLAN_INIT_REQUEST = 'MES3_PRODUCTION_PLAN_INIT_REQUEST >> init remote request'
-export const MES3_PRODUCTION_PLAN_INIT_REQUEST_SUCCESS = 'MES3_PRODUCTION_PLAN_INIT_REQUEST_SUCCESS >> init remote request success'
-export const MES3_PRODUCTION_PLAN_INIT_REQUEST_FAIL = 'MES3_PRODUCTION_PLAN_INIT_REQUEST_SUCCESS >> init remote request fail'
-
-// 查询: 生产计划单
-export const MES3_PRODUCTION_PLAN_LIST_GET_START = 'MES3_PRODUCTION_PLAN_LIST_GET >> plan list start'
-export const MES3_PRODUCTION_PLAN_LIST_GET_SUCCESS = 'MES3_PRODUCTION_PLAN_LIST_GET >> plan list success'
-export const MES3_PRODUCTION_PLAN_LIST_GET_FAIL = 'MES3_PRODUCTION_PLAN_LIST_GET >> plan list fail'
-
-// 生产计划单查询参数暂存
-export const MES3_PRODUCTION_PLAN_SEARCH_PARAMS_SAVE = 'MES3_PRODUCTION_PLAN_SEARCH_PARAMS_SAVE >> save the search prams'
-
-// 获取查看生产计划 -- 顺便,打开viewModal
-// 查看生产计划详情
-export const PRODUCTION_PLAN_GET_VIEW_DETAIL_START = 'PRODUCTION_PLAN_GET >> detail start'
-export const PRODUCTION_PLAN_GET_VIEW_DETAIL_SUCCESS = 'PRODUCTION_PLAN_GET >> detail success'
-export const PRODUCTION_PLAN_GET_VIEW_DETAIL_FAIL = 'PRODUCTION_PLAN_GET >> detail fail'
-
-// 添加|编辑modal: 打开-关闭
-export const MES3_ADD_EDIT_MODAL_OPEN = 'MES3_ADD_EDIT_MODAL_OPEN >> open'
-export const MES3_ADD_EDIT_MODAL_CLOSE = 'MES3_ADD_EDIT_MODAL_CLOSE >> close'
-
-// 查看modal:关闭
-export const MES3_VIEW_MODAL_CLOSE = 'MES3_VIEW_MODAL_CLOSE >> close the viewModal'
-
-// 生成计划单-查询添加
-export const MES3_PRODUCTION_PALN_ADD_BY_QUERY_START = 'MES3_PRODUCTION_PALN_ADD_BY_QUERY >> MES3_ start'
-export const MES3_PRODUCTION_PALN_ADD_BY_QUERY_SUCCESS = 'MES3_PRODUCTION_PALN_ADD_BY_QUERY >> MES3_ success'
-export const MES3_PRODUCTION_PALN_ADD_BY_QUERY_FAIL = 'MES3_PRODUCTION_PALN_ADD_BY_QUERY >> MES3_ fail'
-
-// 生成计划单-查询添加-相关参数修改保存
-export const MES3_PRODUCTION_PLAN_MODAL_RECORDS_UPDATE = 'MES3_PRODUCTION_PLAN_MODAL_RECORDS_UPDATE >> update some field value'
-
-// 生成计划单-查询添加  创建时参数保存
-export const MES3_PROUCTIN_PLAN_MODAL_QUERY_CREATE_PLAN_PARAMS_UPDATE = 'MES3_PROUCTIN_PLAN_MODAL_QUERY_CREATE_PLAN_PARAMS_UPDATE >> open'
-
-// 生成计划单-根据查询-创建
-export const MES3_PRODUCTION_PLAN_QUERY_CREATE_START = 'MES3_PRODUCTION_PLAN_QUERY_MAKE >> start create query plan'
-
-// 生成计划单-根据查询-清空记录
-export const MES3_PRODUCTION_PLAN_MODAL_QUERY_RECORDS_CLEAR = 'MES3_PRODUCTION_PLAN_MODAL_QUERY_RECORDS_CLEAR >> clear table reocrds'
-
-// 生成计划单-根据查询-生成后-编辑
-export const MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_TABLE_DATA_ADD = 'MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_TABLE_DATA_ADD >> add data to be added'
-
-// 生成计划单-手动-相关参数修改保存 -- 这里是整体替换
-export const MES3_PRODUCTION_PLAN_MODLA_MANUAL_RECORDS_UPDATE = 'MES3_PRODUCTION_PLAN_MODLA_MANUAL_RECORDS_UPDATE >> update some field value'
-
-// 生产计划单-手动-select选择品项列表获取
-export const MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_START = 'MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET >> MES3_ start'
-export const MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_SUCCESS = 'MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET >> MES3_ success'
-export const MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_FAIL = 'MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET >> MES3_ fail'
-
-// 生成计划单-手动-加工间/单据日期 修改保存
-export const MES3_PRODUCTION_PLAN_MODAL_MANUAL_CREATE_PLAN_PARAMS_UPDATE = `
-    MES3_PRODUCTION_PLAN_MODAL_MANUAL_CREATE_PLAN_PARAMS_UPDATE >> create plan params update`
-
-// 生成计划单-手动-清空 已添加数据
-export const MES3_PRODUCTION_PLAN_MODALMANUAL_ADDED_ITEMDS_CLEAR = 'MES3_PRODUCTION_PLAN_MODALMANUAL_ADDED_ITEMDS_CLEAR >> clear the added items'
-
-// 生成计划单-手动-更新 已添加数据
-export const MES3_PRODUCTIO_PLAN_MODAL_MANUAL_ADDED_IEMDS_UPDATE = 'MES3_PRODUCTIO_PLAN_MODAL_MANUAL_ADDED_IEMDS_UPDATE >> update the added items'
-// 生成计划单-手动-创建 生产计划
-export const MES3_PRODUCTION_PLAN_MODAL_MANUAL_CREATE = 'MES3_PRODUCTION_PLAN_MODAL_MANUAL_CREATE >> create plan in manual way'
-
-// 生成计划单-手动-初始化 或者说清空modal中所有已经存在的数据
-export const MES3_PRODUCTION_PLAN_MAUAL_ALL_CLEAR = 'MES3_PRODUCTION_PLAN_MAUAL_ALL_CLEAR >> clear the data in the modal'
-
-// 生成计划单-手动-编辑--初始化
-export const MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT_START = 'MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT >> MES3 init start'
-export const MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT_SUCCESS = 'MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT >> MES3 init success'
-export const MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT_FAIL = 'MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT >> MES3 init fail'
-
-// 生成计划单-查询(安全库存和订单)-编辑--初始化
-export const MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_INIT_START = 'MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT >> MES3_ start'
-export const MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_INIT_SUCCESS = 'MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT >> MES3_ success'
-export const MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_INIT_FAIL = 'MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT >> MES3_ fail'
-
-// 生成计划单-编辑 modal关闭
-export const MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_MODAL_CLOSE = 'MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_MODAL_CLOSE >> open'
-
-// 生产计划单-创建/保存
-export const MES3_PRODUCTION_PLAN_CREATE_START = 'MES3_PRODUCTION_PLAN_CREATE >> MES3_ start'
-export const MES3_PRODUCTION_PLAN_CREATE_SUCCESS = 'MES3_PRODUCTION_PLAN_CREATE >> MES3_ success'
-export const MES3_PRODUCTION_PLAN_CREATE_FAIL = 'MES3_PRODUCTION_PLAN_CREATE >> MES3_ fail'
-
-// 生产计划单-审核
-export const MES3_PRODUCTION_PLAN_AUDIT_START = 'MES3_PRODUCTION_PLAN_AUDIT >> MES3 audit start'
-export const MES3_PRODUCTION_PLAN_AUDIT_SUCCESS = 'MES3_PRODUCTION_PLAN_AUDIT >> MES3 success'
-export const MES3_PRODUCTION_PLAN_AUDIT_FAIL = 'MES3_PRODUCTION_PLAN_AUDIT >> MES3 audit fail'
-
-// 生产计划单-删除
-export const MES3_PRODUCTION_PLAN_DELTELE_START = 'MES3_PRODUCTION_PLAN_DELTELE >> MES3_ start'
-export const MES3_PRODUCTION_PLAN_DELTELE_SUCCESS = 'MES3_PRODUCTION_PLAN_DELTELE >> MES3_ success'
-export const MES3_PRODUCTION_PLAN_DELTELE_FAIL = 'MES3_PRODUCTION_PLAN_DELTELE >> MES3_ fail'
-
-// 生产计划单-编辑
-export const MES3_PRODUCTION_PLAN_UPDATE_START = 'MES3_PRODUCTION_PLAN_UPDATE >> MES3_ start'
-export const MES3_PRODUCTION_PLAN_UPDATE_SUCCESS = 'MES3_PRODUCTION_PLAN_UPDATE >> MES3_ success'
-export const MES3_PRODUCTION_PLAN_UPDATE_FAIL = 'MES3_PRODUCTION_PLAN_UPDATE >> MES3_ fail'
-
-// 组件销毁
-
-const $$initialState = Immutable.fromJS(initialState)
-
-const handlers = {
-    // 组件销毁后还原初始状态
-    [MES3_RPODUCTION_PLAN_UNMOUNT]: ($$state) => {
-        return Immutable.fromJS(initialState)
-    },
-    // 初始化请求
-    [MES3_PRODUCTION_PLAN_INIT_REQUEST]: ($state) => {
-        return $state.set('loading', true)
-    },
-    [MES3_PRODUCTION_PLAN_INIT_REQUEST_SUCCESS]: ($state, action) => {
-        const { allotList, plansData } = action.payload
-        return $state.set('allotList', allotList)
-            .set('tableData', plansData)
-            .set('loading', false)
-    },
-    [MES3_PRODUCTION_PLAN_INIT_REQUEST_FAIL]: ($state) => {
-        return $state.set('loading', false)
-    },
-    // 查询: 生产计划单
-    [MES3_PRODUCTION_PLAN_LIST_GET_START]: ($state) => {
-        return $state.set('loading', true)
-    },
-    [MES3_PRODUCTION_PLAN_LIST_GET_SUCCESS]: ($state, action) => {
-        return $state.set('loading', false).set('tableData', action.payload )
-    },
-    [MES3_PRODUCTION_PLAN_LIST_GET_FAIL]: ($state) => {
-        return $state.set('loading', false)
-    },
-    // 生产计划单查询参数暂存
-    [MES3_PRODUCTION_PLAN_SEARCH_PARAMS_SAVE]: ($state, action) => {
-        const payload = action.payload
-        return $state.setIn(['searchParams', payload.keyName], payload.value )
-    },
-    // 获取仓库列表
-    [PRODUCTION_PLAN_GET_VIEW_DETAIL_START]: ($state) => {
-        return $state.set('loading', true)
-    },
-    [PRODUCTION_PLAN_GET_VIEW_DETAIL_SUCCESS]: ($state, action) => {
-        const payload = action.payload
-        return $state.set(
-            'loading', false
-        ).set(
-            'viewModalData',Immutable.fromJS({
-                ... payload,
-            },)
-        ).setIn(
-            ['viewModal', 'visible'], true
-        )
-    },
-    [PRODUCTION_PLAN_GET_VIEW_DETAIL_FAIL]: ($state) => {
-        return $state.set('loading', false)
-    },
-    // 打开添加/编辑modal 打开-关闭
-    [MES3_ADD_EDIT_MODAL_OPEN]: ($state, action) => {
-        const payload = action.payload
-        return $state.set(payload.name, {
-            visible: true,
-            title: payload.title,
-            type: payload.action,
-        })
-    },
-    [MES3_ADD_EDIT_MODAL_CLOSE]: ($state, action) => {
-        const payload = action.payload
-        return $state.set(payload.type, {
-            visible: false,
-            title: '',
-            type: '',
-        })
-    },
-    // 查看modal:关闭
-    [MES3_VIEW_MODAL_CLOSE]: ($state) => {
-        return $state.set('loading', false).setIn(['viewModal', 'visible'], false)
-    },
-    // 生成计划单-查询添加
-    [MES3_PRODUCTION_PALN_ADD_BY_QUERY_START]: ($state) => {
-        // return $state.set('loading', true)
-        return $state
-    },
-    [MES3_PRODUCTION_PALN_ADD_BY_QUERY_SUCCESS]: ($state, action) => {
-        // return $state.set('loading', false).merge({ modalQueryTableRecords: action.payload })
-        // 这里必须使用 Immutable.fromJS(action.payload)才能正常渲染,原因不清楚
-        return $state.set('modalQueryTableRecords', Immutable.fromJS(action.payload))
-    },
-    [MES3_PRODUCTION_PALN_ADD_BY_QUERY_FAIL]: ($state) => {
-        return $state.set('loading', false)
-    },
-    // 生成计划单-查询添加-相关参数修改保存
-    [MES3_PRODUCTION_PLAN_MODAL_RECORDS_UPDATE]: ($state, action) => {
-        return $state.set('modalQueryTableRecords', Immutable.fromJS(action.payload))
-    },
-    // 生成计划单-查询添加  创建时参数保存
-    [MES3_PROUCTIN_PLAN_MODAL_QUERY_CREATE_PLAN_PARAMS_UPDATE]: ($state, action) => {
-        return $state.set('modalQueryCreatePlanParams', {
-            allotId: action.payload,
-        })
-    },
-    // 生成计划单-根据查询-生成
-    [MES3_PRODUCTION_PLAN_QUERY_CREATE_START]: ($state) => {
-        return $state.set('loading', true)
-    },
-    // 生成计划单-根据查询-清空记录
-    [MES3_PRODUCTION_PLAN_MODAL_QUERY_RECORDS_CLEAR]: ($state) => {
-        return $state.set('modalQueryTableRecords', Immutable.fromJS([]))
-    },
-    // 生成计划单-根据查询-生成后-编辑
-    [MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_TABLE_DATA_ADD]: ($state, action) => {
-        return $state.set('modalQueryTableRecords', Immutable.fromJS(action.payload))
-    },
-    // 生成计划单-手动-加工间/单据日期 修改保存
-    [MES3_PRODUCTION_PLAN_MODAL_MANUAL_CREATE_PLAN_PARAMS_UPDATE]: ($state, action) => {
-        const payload = action.payload
-        return $state.setIn(['modalManualCreatePlanParams', payload.type], payload.value)
-    },
-    // 生成计划单-手动-相关参数修改保存
-    [MES3_PRODUCTION_PLAN_MODLA_MANUAL_RECORDS_UPDATE]: ($state, action) => {
-        return $state.set('modalManualAddTableRecords', Immutable.fromJS(action.payload))
-    },
-    // 生产计划单-手动-select选择品项列表获取
-    // TODO:弹框时前,直接获取,只需要请求一次
-    [MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_START]: ($state) => {
-        return $state.set('loading', true)
-    },
-    [MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_SUCCESS]: ($state, action) => {
-        return $state.set('loading', false).set('modalManualRecordGoodsList', Immutable.fromJS(action.payload))
-    },
-    [MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_FAIL]: ($state) => {
-        return $state.set('loading', false)
-    },
-    // 生成计划单-手动-创建 生产计划
-    [MES3_PRODUCTION_PLAN_MODAL_MANUAL_CREATE]: ($state) => {
-        return $state.set('loading', true)
-    },
-    // 生成计划单-手动-清空 已添加数据
-    [MES3_PRODUCTION_PLAN_MODALMANUAL_ADDED_ITEMDS_CLEAR]: ($state) => {
-        return $state.set('modalManualAddTableRecords', Immutable.fromJS([]))
-    },
-    // 生成计划单-手动-更新 已添加数据
-    [MES3_PRODUCTIO_PLAN_MODAL_MANUAL_ADDED_IEMDS_UPDATE]: ($state, action) => {
-        return $state.set('modalManualAddTableRecords', Immutable.fromJS(action.payload))
-    },
-    // 生成计划单-手动-初始化 或者说清空modal中所有已经存在的数据
-    [MES3_PRODUCTION_PLAN_MAUAL_ALL_CLEAR]: ($state) => {
-        return $state.set(
-            'modalManualAddTableRecords', Immutable.fromJS([])
-        ).set('modalManualCreatePlanParams', Immutable.fromJS({
-            allotId: '',
-            produceBillDate: initDate,
-        }))
-    },
-    // 生成计划单-手动-编辑--初始化
-    [MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT_START]: ($state) => {
-        return $state.set('loading', true)
-    },
-    [MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT_SUCCESS]: ($state, action) => {
-        const { payload, payload: { modalData } } = action
-        if (modalData.name === 'manualModal') {
-            return $state.set('loading', false).set(
-                'modalManualAddTableRecords', Immutable.fromJS(payload.items)
-            ).set(
-                'modalManualCreatePlanParams', Immutable.fromJS({
-                    allotId: payload.cover.allotId.toString(),
-                    produceBillDate: payload.cover.produceBillDate.toString(),
-                })
-            ).set(
-                'modalManualEditOnly', Immutable.fromJS(payload.editOnly)
-            ).set('manualModal', Immutable.fromJS({
-                title: modalData.title,
-                visible: true,
-                type: modalData.action, 
-            }))
-        }
-        if (modalData.name === 'queryModal') {
-            return $state.set('loading', false).merge({ MES3_: action.payload })
-        }
-    },
-    [MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT_FAIL]: ($state) => {
-        return $state.set('loading', false)
-    },
-    // 生产计划单创建 保存
-    [MES3_PRODUCTION_PLAN_CREATE_START]: ($state) => {
-        return $state.set('loading', true)
-    },
-    [MES3_PRODUCTION_PLAN_CREATE_SUCCESS]: ($state) => {
-        return $state.set('loading', false)
-    },
-    [MES3_PRODUCTION_PLAN_CREATE_FAIL]: ($state) => {
-        return $state.set('loading', false)
-    },
-    // 生产计划单审核
-    [MES3_PRODUCTION_PLAN_AUDIT_START]: ($state) => {
-        return $state.set('loading', true)
-    },
-    [MES3_PRODUCTION_PLAN_AUDIT_SUCCESS]: ($state, action) => {
-        return $state.set('loading', false)
-    },
-    [MES3_PRODUCTION_PLAN_AUDIT_FAIL]: ($state) => {
-        return $state.set('loading', false)
-    },
-    // 生产计划单删除
-    [MES3_PRODUCTION_PLAN_DELTELE_START]: ($state) => {
-        return $state.set('loading', true)
-    },
-    [MES3_PRODUCTION_PLAN_DELTELE_SUCCESS]: ($state, action) => {
-        return $state.set('loading', false).merge({ MES3_: action.payload })
-    },
-    [MES3_PRODUCTION_PLAN_DELTELE_FAIL]: ($state) => {
-        return $state.set('loading', false)
-    },
-    // 生产计划单编辑
-    [MES3_PRODUCTION_PLAN_UPDATE_START]: ($state) => {
-        return $state.set('loading', true)
-    },
-    [MES3_PRODUCTION_PLAN_UPDATE_SUCCESS]: ($state, action) => {
-        return $state.set('loading', false)
-    },
-    [MES3_PRODUCTION_PLAN_UPDATE_FAIL]: ($state) => {
-        return $state.set('loading', false)
-    },
-    // 生成计划单-查询(安全库存和订单)-编辑--初始化
-    [MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_INIT_START]: ($state) => {
-        return $state.set('loading', true)
-    },
-    [MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_INIT_SUCCESS]: ($state, action) => {
-        const { records, editOnly, desc, modalData } = action.payload
-        return $state.set('loading', false).set(
-            'modalQueryTableRecords', Immutable.fromJS(records)
-        ).set(
-            'modalQueryDesc', Immutable.fromJS(desc)
-        ).set(
-            'modalQueryEditOnly', Immutable.fromJS(editOnly)
-        ).set(
-            'modalQueryEdit', Immutable.fromJS({
-                title: modalData.title,
-                visible: true,
-            })
-        )
-    },
-    [MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_INIT_FAIL]: ($state) => {
-        return $state.set('loading', false)
-    },
-    // 生成计划单-编辑 modal关闭
-    [MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_MODAL_CLOSE]: ($state) => {
-        return $state.set('modalQueryEdit', Immutable.fromJS({
-            title: '',
-            visible: false,
-        }))
-    },
-}
-
-export default handleActions(handlers, $$initialState)
-
-// unmount
-export const unmount = createAction(MES3_RPODUCTION_PLAN_UNMOUNT, () => {})
-// 初始化远程请求
-export const initRequests = createAction(MES3_PRODUCTION_PLAN_INIT_REQUEST, (opts) => {
-    const getAllotList = axios.post(url, {
-        service: service_MES3,
-        method: getOrgUrl,
-        type: 'post',
-        data: opts.allotParams,
-    })
-    const queryProductionPlanList = axios.post(url, {
-        service: service_MES3,
-        method: queryProductionPlanListUrl,
-        type: 'post',
-        data: opts.planParams,
-    })
-    Promise.all([getAllotList, queryProductionPlanList])
-        .then(res => {
-            const allotRes = res[0]
-            const plansRes = res[1]
-            if (allotRes.success && plansRes.success) {
-                dispatch({
-                    type: MES3_PRODUCTION_PLAN_INIT_REQUEST_SUCCESS,
-                    payload: {
-                        allotList: allotRes.data,
-                        plansData: plansRes.data,
-                    },
-                })
-                opts.success && opts.success()
-            } else {
-                dispatch({
-                    type: MES3_PRODUCTION_PLAN_INIT_REQUEST_FAIL,
-                })
-                if (!allotRes.suceess) {
-                    if (typeof allotRes.message === 'string') {
-                        message.warning(allotRes.message)
-                    } else {
-                        message.warning('获取加工间出错!')                        
-                    }
-                }
-                if (!plansRes.suceess) {
-                    if (typeof allotRes.message === 'string') {
-                        message.warning(allotRes.message)
-                    } else {
-                        message.warning('获取生产计划出错!')                        
-                    }               
-                }
-            }
-        }).catch(err => {
-            console.log('err', err)
-            message.warning('请求出错!~')
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_INIT_REQUEST_FAIL,
-            })
-        })
-})
-
-/* 查询 */
-// 查询: 生产计划单
-export const queryProductionPlanList = createAction(MES3_PRODUCTION_PLAN_LIST_GET_START, (opts) => {
-    axios.post(url, {
-        service: service_MES3,
-        method: queryProductionPlanListUrl,
-        type: 'post',
-        data: opts,
-    }).then((res) => {
-        if (res.success) {          
-            const data = res.data
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_LIST_GET_SUCCESS,
-                payload: data,
-            })
-        } else {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_LIST_GET_FAIL,
-            })
-            if (typeof res.message === 'string') {
-                message.warning(res.message)
-            } else {
-                message.warning('获取生产计划单失败!')
-            }
-        }
-    }).catch((err) => {
-        console.log('err', err)        
-        message.warning('请求出错!~')        
-        dispatch({
-            type: MES3_PRODUCTION_PLAN_LIST_GET_FAIL,
-        })
-    })
-})
-
-// 生产计划单查询参数暂存
-export const saveSearchParams = createAction(MES3_PRODUCTION_PLAN_SEARCH_PARAMS_SAVE, (opts) => opts)
-
-// 添加|编辑modal: 打开-关闭
-export const addEditModalOpen = createAction(MES3_ADD_EDIT_MODAL_OPEN, (opts) => opts)
-export const addEditModalClose = createAction(MES3_ADD_EDIT_MODAL_CLOSE, (opts) => opts)
-
-// 查看生产计划详情
-export const  getProductionPlanViewDetail = createAction(PRODUCTION_PLAN_GET_VIEW_DETAIL_START, (opts) => {
-    axios.post(url, {
-        service: service_MES3,
-        method: queryProductionPlanDetailUrl,
-        type: 'post',
-        data: opts.postData,
-    }).then((res) => {
-        if (res.success) {
-            const data = res.data
-            const payload = {
-                items: data.records,
-                desc: opts.desc,
-            }
-            dispatch({
-                type: PRODUCTION_PLAN_GET_VIEW_DETAIL_SUCCESS,
-                payload,
-            })
-        } else {
-            dispatch({
-                type: PRODUCTION_PLAN_GET_VIEW_DETAIL_FAIL,
-            })
-            message.warning(res.msg)
-        }
-    }).catch((err) => {
-        console.log('err', err)
-        dispatch({
-            type: PRODUCTION_PLAN_GET_VIEW_DETAIL_FAIL,
-        })
-        message.warning('请求出错!~')
-    })
-})
-// 查看modal:关闭
-export const  viewModalClose = createAction(MES3_VIEW_MODAL_CLOSE, (opts) => opts)
-// 生成计划单-查询添加
-export const getModalQueryAddList = createAction(MES3_PRODUCTION_PALN_ADD_BY_QUERY_START, (opts) => {
-    // success比start还要先执行,为什么?
-    // dispatch({
-    //     type: MES3_PRODUCTION_PALN_ADD_BY_QUERY_SUCCESS,
-    //     payload: modalQueryTableRecords,
-    // })
-    // return
-    axios.post(url, {
-        service: service_MES3,
-        method: queryModalQueryGoodsUrl,
-        type: 'post',
-        data: opts,
-    }).then((res) => {
-        if (res.success) {
-            const data = res.data
-            if( Object.prototype.toString.call(data.records).toLowerCase().slice(8, -1) !== 'array' ) {
-                data.records = []
-            }
-            if (data.records.length === 0) {
-                message.success('暂无记录')
-            }
-            dispatch({
-                type: MES3_PRODUCTION_PALN_ADD_BY_QUERY_SUCCESS,
-                payload: data.records,
-            })
-        } else {
-            dispatch({
-                type: MES3_PRODUCTION_PALN_ADD_BY_QUERY_FAIL,
-            })
-            message.warning(res.msg)
-        }
-    }).catch((err) => {
-        console.log(err, err)
-        dispatch({
-            type: MES3_PRODUCTION_PALN_ADD_BY_QUERY_FAIL,
-        })
-        message.warning('请求出错!~')
-    })
-})
-// 生成计划单-查询添加-相关参数修改保存
-export const updateModalQueryRecord = createAction(MES3_PRODUCTION_PLAN_MODAL_RECORDS_UPDATE, (opts) => opts)
-// 生成计划单-查询添加  创建时参数保存
-export const updateModalQueryCreateParams = createAction(MES3_PROUCTIN_PLAN_MODAL_QUERY_CREATE_PLAN_PARAMS_UPDATE, (opts) => opts)
-// 生成计划单-根据查询-生成
-export const submitModalQueryProductionPlan = createAction(MES3_PRODUCTION_PLAN_QUERY_CREATE_START, (opts) => {
-    dispatch(createProductionPlan(opts))
-})
-// 生成计划单-根据查询-清空记录
-export const clearModalQueryTableRecords = createAction(MES3_PRODUCTION_PLAN_MODAL_QUERY_RECORDS_CLEAR, (opts) => opts)
-
-// 生成计划单-根据查询-生成后-编辑
-export const addModalQueryTableRecords = createAction(MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_TABLE_DATA_ADD, (opts) => opts)
-
-// 生成计划单-手动-相关参数修改保存
-export const updateModalManualRecord = createAction(MES3_PRODUCTION_PLAN_MODLA_MANUAL_RECORDS_UPDATE, (opts) => opts)
-// 生产计划单-手动-select选择品项列表获取
-export const queryModalManualGoodsSelectList = createAction(MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_START, (opts) => {
-    // 请求完成初始化数据,然后才显示modal modalManualRecordGoodsList
-    axios.post(url, {
-        service: service_SC,
-        method: queryModalManualGoodsUrl,
-        type: 'post',
-        data: opts,
-    }).then((res) => {
-        if (res.success) {
-            const data = res.data
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_SUCCESS,
-                payload: data.records,
-            })
-        } else {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_FAIL,
-            })
-            message.warning(res.msg)
-        }
-    }).catch((err) => {
-        console.log('err', err)
-        dispatch({
-            type: MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_FAIL,
-        })
-        message.warning('请求出错!~')
-    })
-})
-// 生成计划单-手动-加工间/单据日期 修改保存
-export const updateModalManualCreateParams = createAction(MES3_PRODUCTION_PLAN_MODAL_MANUAL_CREATE_PLAN_PARAMS_UPDATE, (opts) => opts)
-
-// 生成计划单-手动-清空 已添加数据
-export const clearModalManualAddedItems = createAction(MES3_PRODUCTION_PLAN_MODALMANUAL_ADDED_ITEMDS_CLEAR, (opts) => opts)
-
-// 生成计划单-手动-更新 已添加数据
-export const updateModalManualAddedItems = createAction(MES3_PRODUCTIO_PLAN_MODAL_MANUAL_ADDED_IEMDS_UPDATE, (opts) => opts)
-
-// 生成计划单-手动-创建 生产计划
-export const submitModalManualProductionPlan = createAction(MES3_PRODUCTION_PLAN_MODAL_MANUAL_CREATE, (opts) => {
-    dispatch(createProductionPlan(opts))
-})
-
-// 生成计划单-手动-初始化 或者说清空modal中所有已经存在的数据
-export const clearModalManualAllData = createAction(MES3_PRODUCTION_PLAN_MAUAL_ALL_CLEAR, (opts) => opts)
-
-// 生成计划单-手动-编辑--初始化
-export const initModalManualEdit = createAction(MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT_START, (opts) => {
-    // 不方便复用查看生产计划单详情的原因 ? 这种情况下,需要生产计划单计划详情如何显示,才能方便这样的再请求处理?
-    // 计划单详情
-    const detailPromise = axios.post(url, {
-        service: service_MES3,
-        method: queryProductionPlanDetailUrl,
-        type: 'post',
-        data: opts.detailData.post,
-    })
-    // 加工间下品项列表
-    const goodsPromise = axios.post(url, {
-        service: service_SC,
-        method: queryModalManualGoodsUrl,
-        type: 'post',
-        data: opts.goodsData,
-    })
-    Promise.all([detailPromise, goodsPromise]).then(reses => {
-        const isSuccess =  reses.every(res => {
-            return res.success === true
-        })
-        if (isSuccess) {
-            const detailRes = reses[0]
-            // 添加与增加品项时,相同的字段名称 => 统一字段
-            const detailRecords = detailRes.data.records        
-            const items = detailRecords.map(item=>{
-                return Object.assign({},item, { 
-                    goodsID: item.goodsId,
-                    goodsDesc: item.goodsSpec,
-                    categoryID: item.goodsId,
-                    standardUnit: item.goodsStandardUnit,
-                    defaultHouseID: item.houseId,
-                    defaultHouseName: item.houseName,
-                })
-            })
-            const payload = {
-                items: items,
-                cover: opts.detailData.cover,
-                editOnly: opts.detailData.editOnly,
-                modalData: opts.modalData,
-            }
-            // 除品项列表外的其它数据添加到redux
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_MODAL_MANUAL_EDIT_INIT_SUCCESS,
-                payload,
-            })
-            // 更新品项列表
-            const goodsRes = reses[1]            
-            const goodsList = goodsRes.data.records // 查询品项的参数
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_SUCCESS,
-                payload: goodsList,
-            })
-        } else {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_FAIL,
-            })
-            message.warning('请求出错!~')
-        }
-    }).catch(err => {
-        console.log('err', err)
-        dispatch({
-            type: MES3_PRODUCTION_PLAN_MODAL_MANUAL_GOODS_LIST_GET_FAIL,
-        })
-        message.warning('请求出错!~')
-    })
-})
-// 生成计划单-查询(安全库存和订单)-编辑--初始化
-export const initModalQueryEdit = createAction(MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_INIT_START, (opts) => {
-    axios.post(url, {
-        service: service_MES3,
-        method: queryProductionPlanDetailUrl,
-        type: 'post',
-        data: opts.detailData.post,
-    }).then((res) => {
-        if (res.success) {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_INIT_SUCCESS,
-                payload: {
-                    records: res.data.records,
-                    editOnly: opts.detailData.editOnly,
-                    desc: opts.detailData.desc,
-                    modalData: opts.modalData,
-                },
-            })
-        } else {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_INIT_FAIL,
-            })
-            message.warning(res.msg)
-        }
-    }).catch((err) => {
-        console.log('err', err)
-        dispatch({
-            type: MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_INIT_FAIL,
-        })
-        message.warning('请求出错!~')
-    })
-})
-// 生成计划单-编辑 modal关闭
-export const closeModalQueryEdit = createAction(MES3_PRODUCTION_PLAN_MODAL_QUERY_EDIT_MODAL_CLOSE, (opts) => opts)
-// 生产计划单创建(保存)
-export const createProductionPlan = createAction(MES3_PRODUCTION_PLAN_CREATE_START, async (opts, success) => {
-    await axios.post(url, {
-        service: service_MES3,
-        method: createProdcutionPlanUrl,
-        type: 'post',
-        data: opts.postData,
-    }).then((res) => {
-        if (res.success) {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_CREATE_SUCCESS,
-            })
-            message.success('执行成功')
-            // 刷新列表 -- 可以形成代码片断
-            dispatch(queryProductionPlanList(opts.query))
-            // 关闭弹框
-            const modalType = opts.modalType
-            if (modalType === 'manualModal') {
-                dispatch(addEditModalClose({type: 'manualModal'}))
-                // 清空弹框所有数据
-                dispatch(clearModalManualAllData())
-            }
-            if (modalType === 'queryModal') {
-                dispatch(addEditModalClose({type: 'queryModal'}))
-                // 这里只是清空了 table records
-                dispatch(clearModalQueryTableRecords)
-            }
-        } else {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_CREATE_FAIL,
-            })
-            message.warning(res.msg)
-        }
-    }).catch((err) => {
-        console.log('err', err)
-        dispatch({
-            type: MES3_PRODUCTION_PLAN_CREATE_FAIL,
-        })
-        message.warning('请求出错!~')
-    })
-})
-// 生产计划单审核
-export const auditProductionPlan = createAction(MES3_PRODUCTION_PLAN_AUDIT_START, (opts) => {
-    axios.post(url, {
-        service: service_MES3,
-        method: auditProductionPlanUrl,
-        type: 'post',
-        data: opts.postData,
-    }).then((res) => {
-        if (res.success) {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_AUDIT_SUCCESS,
-            })
-            message.success('审核成功')
-            dispatch(queryProductionPlanList(opts.query))
-        } else {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_AUDIT_FAIL,
-            })
-            message.warning(res.msg)
-        }
-    }).catch((err) => {
-        console.log('err', err)
-        dispatch({
-            type: MES3_PRODUCTION_PLAN_AUDIT_FAIL,
-        })
-        message.warning('请求出错!~')
-    })
-})
-// 生产计划单删除
-export const deleteProductionPlan = createAction(MES3_PRODUCTION_PLAN_DELTELE_START, async (opts) => {
-    await axios.post(url, {
-        service: service_MES3,
-        method: delProductionPlanUrl,
-        type: 'post',
-        data: opts.postData,
-    }).then((res) => {
-        if (res.success) {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_DELTELE_SUCCESS,
-            })
-            message.success('执行成功')
-            dispatch(queryProductionPlanList(opts.query))            
-        } else {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_DELTELE_FAIL,
-            })
-            message.warning(res.msg)
-        }
-    }).catch((err) => {
-        console.log('err', err)
-        dispatch({
-            type: MES3_PRODUCTION_PLAN_DELTELE_FAIL,
-        })
-        message.warning('请求出错!~')
-    })
-})
-// 生产计划单编辑
-export const updateProductionPlan = createAction(MES3_PRODUCTION_PLAN_UPDATE_START, async (opts) => {
-    await axios.post(url, {
-        service: service_MES3,
-        method: updateProductionPlanUrl,
-        type: 'post',
-        data: opts.postData,
-    }).then((res) => {
-        if (res.success) {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_UPDATE_SUCCESS,
-            })
-            message.success('执行成功')
-            // 刷新列表 -- 可以形成代码片断
-            dispatch(queryProductionPlanList(opts.query))
-            // 关闭弹框
-            const modalType = opts.modalType
-            if (modalType === 'manualModal') {
-                dispatch(addEditModalClose({type: 'manualModal'}))
-                // 清空弹框所有数据
-                dispatch(clearModalManualAllData())
-            }
-            if (modalType === 'queryModal') {
-                dispatch(closeModalQueryEdit())
-                // dispatch(addEditModalClose({type: 'queryModal'}))
-                // 这里只是清空了 table records
-                dispatch(clearModalQueryTableRecords())
-            }
-        } else {
-            dispatch({
-                type: MES3_PRODUCTION_PLAN_UPDATE_FAIL,
-            })
-            message.warning(res.msg)
-        }
-    }).catch((err) => {
-        console.log('err', err)
-        dispatch({
-            type: MES3_PRODUCTION_PLAN_UPDATE_FAIL,
-        })
-        message.warning('请求出错!~')
-    })
-})
