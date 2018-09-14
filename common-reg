@@ -1,0 +1,19 @@
+const Reg = {
+    regNum: /^\d+(\.\d+)?$/, //整数+小数
+    cnEnNum: { // 常见场景: 编码
+        pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9]+$/, //汉字+字母+数字
+        message: '只能输入汉字、字母和数字', // 提示说明
+    },
+    enNum: { // 常见场景: 名字
+        pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9]+$/, //字母+数字
+        message: '只能输入字母和数字！',
+    },
+    notNum: {
+        pattern: /[^0-9]/ig,
+        message: '不可输入数字', // 非数字
+    },
+    num: {
+        pattern: /^\d+(\.\d+)?$/, // 输入数字
+        message: '请输入数字！', // 非数字        
+    },
+}
