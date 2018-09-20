@@ -1,0 +1,46 @@
+import { axios } from '@hualala/platform-base'
+import { Modal } from 'antd'
+import {
+    url,
+    service_MES3,
+} from '../constants/serviceUrl'
+
+// ajax请求success返回false时的提示
+function ajaxFail(msg) {
+    Modal.warning({
+        title: `提示`,
+        content: (<div>{msg}</div>),
+        onOk() {},
+        okText: '我知道了',
+    })
+}
+// ajax请求进入catch时的错误提示
+function ajaxCatch(msg) {
+    Modal.error({
+        title: `噢,发生错误了!`,
+        content: (<div>{msg}</div>),
+        onOk() {},
+        okText: '我知道了',
+    })
+}
+
+function fetchData ({service: service_MES3, method, type: type, data }, success, fail, error) {
+    axios.post(url, {
+        service: service_MES3,
+        method: method,
+        type: type,
+        data: data,
+    }).then((res) => {
+        if (res.success) {
+            success && success()
+        } else {
+            ajaxFail(res.msg)
+            fail && fail()
+        }
+    }).catch((err) => {
+        ajaxCatch(err)
+        error && error()
+    })
+}
+
+export default fetchData
