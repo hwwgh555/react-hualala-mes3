@@ -1,18 +1,46 @@
 const validateObject = {
-    goodsCode: false,
-    planProduceNum: false,
-}
-validateObject.goodsCode = !(modalManualAddTableRecords.some(record => {
-    return (record.goodsCode === null || record.goodsCode === '')
-}))
-validateObject.planProduceNum = !(modalManualAddTableRecords.some(record => {
-    return (record.planProduceNum === undefined || record.planProduceNum === null || record.planProduceNum === '')
-}))
-if (!validateObject.goodsCode) {
-    message.warning('请选择品项!')
-    return
-}
-if (!validateObject.planProduceNum) {
-    message.warning('请输入数量!')
-    return
-}
+            planProduceNum: false,
+            remark: {
+                isOk: false,
+                errType: null,
+                max: {
+                    condition: 200,
+                    message: '不能超过200个字符!',
+                },
+                pattern: {
+                    condition: /^[0-9a-zA-Z\u4E00-\u9FA5]+$/,
+                    message: '只能输入数字,汉字和字母',
+                },
+            },
+        }
+        validateObject.planProduceNum = !(selectedProduceOrders.some(record => {
+            return (Number(record.planProduceNum) === 0)
+        }))
+        selectedProduceOrders.some(record => {
+            if (record.remark === undefined || record.remark === '') {
+                validateObject.remark.isOk = true
+                return true
+            }
+            if (record.remark.length > validateObject.remark.max.condition ) {
+                validateObject.remark.isOk = false
+                validateObject.remark.errType = 'max'
+                return true
+            }
+            if (!validateObject.remark.pattern.condition.test(record.remark) ) {
+                validateObject.remark.isOk = false
+                validateObject.remark.errType = 'pattern'
+                return true
+            }
+            validateObject.remark.isOk = true
+            return true
+        })
+        if (!validateObject.planProduceNum) {
+            message.warning('请输入数量,并且数量不能为0!')
+            return
+        }
+        if (!validateObject.remark.isOk) {
+            const curValidation = validateObject.remark
+            const msg = curValidation[curValidation.errType].message
+            message.warning(msg)
+            return
+        }
