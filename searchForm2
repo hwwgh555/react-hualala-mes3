@@ -1,0 +1,118 @@
+// header 中引入searchForm及使用方法
+// 2018-08-07 故障原因 by huangwenwu
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { Col, Icon, Button } from 'antd'
+import { parseUrlParams, mes3ExportExcel } from '../../../util'
+import { procedureExportUrl } from '../../../constants/serviceUrl'
+import {
+
+} from '../../../state/process'
+
+// 引入search 面板组件
+import { getFormValues } from 'redux-form'
+import { getInit, SearchForm, searchFormInitialValues } from './init'
+import { initElement, formatSearchParams } from '../../Common/SearchCommon/HLLCommon'
+const init = getInit()
+
+function mapStateToProps(store) {
+    return {
+        values: getFormValues(init.name)(store),
+    }
+}
+function mapDispatchToProps(dispatch) {
+    return {
+    }
+}
+@connect(mapStateToProps, mapDispatchToProps)
+export default class Header extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            init,
+            formInitialParams: searchFormInitialValues,
+        }
+    }
+    componentDidMount() {
+        const { orgID, user } = this.props;
+        const _editModal = parseUrlParams().edit
+        //判断是否从导航过来，需要新增工序
+        const self = this
+        initElement(getInit(), (initial) => {
+            self.setState({
+                init: initial,
+            }, () => {
+                const values = self.props.values
+                // console.log('我要打印了=====>>>>', values);
+                this.search(values)
+            })
+        })
+    }
+    componentWillReceiveProps(nextProps) {
+        const { values } = this.props
+        if (nextProps.isReSetSearchPanel) {
+            values.procedureNameOrNo = ''
+            values.allotId = ''
+        }
+    }
+    /**
+     * 添加工序
+     */
+    add = () => {
+        const { orgID, user } = this.props
+        const record = {
+            title: '新增工序',
+            visible: true,
+            type: 'add',
+            data: {},
+        }
+        const params = {
+            pageSize: -1,
+            distributionId: orgID,
+            groupID: user.accountInfo.groupID,
+        }
+    }
+    /**
+     * 工序搜索
+     */
+    search = (values) => {
+        const { orgID, user } = this.props
+        console.log('我要打印了=====>>>>search', values);
+    }
+    render() {
+        const { user, orgID } = this.props
+        // init={this.state.init}
+        //                 initialValues={this.state.formInitialParams}
+        console.log('我要打印了=====>>>>render', this.state.init, this.state.formInitialParams);         
+        return (
+            <Col span={24} className="layoutsHeader">
+                <div className="layoutsTool">
+                    <div className="layoutsToolLeft">
+                        <h1>故障原因</h1>
+                    </div>
+                    <div className="layoutsToolRight">
+                        <ul>
+                            <li>
+                                <Button
+                                    onClick={() => this.add()}
+                                    type="ghost"
+                                >
+                                    <Icon type="plus" />新增故障原因
+                                </Button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div className="layoutsLine"></div>
+                <div className="layoutsSearch">
+                    <SearchForm
+                        init={this.state.init}
+                        initialValues={this.state.formInitialParams}
+                        onSubmit={this.search}
+                    />
+                </div>
+            </Col>
+        )
+    }
+}
+
