@@ -1,0 +1,71 @@
+// serachForm组件 INIT几乎最简易的使用方法
+import {
+    reduxForm,
+} from 'redux-form'
+import {
+    HLLSearchPanel,
+} from '../../Common/SearchCommon/HuaLaLa'
+
+// 初始化数据
+const getInit = () => {
+    return {
+        name: 'searchForm',
+        ready: false,
+        normal: [
+            {
+                type: 'select-simple',
+                name: 'stationStatus',
+                label: {
+                    name: '状态',
+                    width: '34px',
+                    placeHolder: '请选择状态',
+                },
+                el: {
+                    width: '118px',
+                },
+                data: [
+                    {
+                        name: '全部状态',
+                        value: '',
+                    },
+                    {
+                        name: '启用',
+                        value: 1,
+                    },
+                    {
+                        name: '禁用',
+                        value: 0,
+                    },
+                ],
+            },
+            {
+                type: 'input-text',
+                name: 'stationNameOrNo',
+                label: {
+                    name: '故障',
+                    width: '34px',
+                    placeHolder: '请输入故障名称或编码',
+                },
+                el: {
+                    width: '156px',
+                },
+            },
+        ],
+        more: [],
+    }
+}
+
+const SearchForm = reduxForm({
+    form: 'searchForm',
+    enableReinitialize: false,
+})(HLLSearchPanel)
+
+const searchFormInitialValues = {
+    stationStatus: 1,
+}
+
+export {
+    getInit,
+    SearchForm,
+    searchFormInitialValues,
+}
