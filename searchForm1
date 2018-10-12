@@ -1,4 +1,4 @@
-// serachForm组件 INIT几乎最简易的使用方法
+// serachForm组件 INIT几乎最简易的使用方法 searchForm的初始化配置
 import {
     reduxForm,
 } from 'redux-form'
