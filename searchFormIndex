@@ -1,0 +1,42 @@
+// 2018-10-12 故障原因 huangwenwu
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import registePage from '../../../index'
+import { MES3_FAILURECAUSE } from '../../../constants/entryCodes'
+
+import { parseUrlParams } from './../../../util'
+import { closePage, jumpPage, getStore } from '@hualala/platform-base'
+
+import { Row, Col } from 'antd'
+import Loading from '../../Common/Loading'
+import Header from './Header'
+
+function mapStateToProps(store) {
+    return {
+    }
+}
+function mapDispatchToProps(dispatch) {
+    return {
+    }
+}
+
+@registePage(MES3_FAILURECAUSE)
+@connect(mapStateToProps, mapDispatchToProps)
+export default class FailureCause extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {}
+    }
+    render() {
+        return (
+            <Row className="layoutsContainer" ref={(container) => { this.dom = container }}>
+                {/* <Loading loading={this.props.loading} /> */}
+                <Header />
+                <Col span={24} className="layoutsLineBlock"></Col>
+                <Col span={24} className="layoutsContent tableClass">
+                    fffffffffff
+                </Col>
+            </Row>
+        )
+    }
+}
