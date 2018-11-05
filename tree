@@ -1,0 +1,70 @@
+this.state = {
+            tableHeight: '',
+            treeData: [
+                {
+                    label: '菜单1',
+                    value: 'menu1',
+                    children: [
+                        {
+                            label: '菜单1-1',
+                            value: 'menu1-1',
+                            children: [
+                                {
+                                    label: '菜单1-1-1',
+                                    value: 'menu1-1-1',
+                                    children: [],
+                                },
+                                {
+                                    label: '菜单1-1-2',
+                                    value: 'menu1-1-2',
+                                    children: [],
+                                },
+                            ],
+                        },
+                        {
+                            label: '菜单1-2',
+                            value: 'menu1-2',
+                            children: [],
+                        },
+                    ],
+                },
+                {
+                    label: '菜单2',
+                    value: 'menu2',
+                    children: [
+                        {
+                            label: '菜单2-1',
+                            value: 'menu2-1',
+                            children: [],
+                        },
+                        {
+                            label: '菜单2-2',
+                            value: 'menu2-2',
+                            children: [],
+                        },
+                    ],
+                },
+            ],
+        }
+ 以上value值唯一,根据value值,查找到对应节点,如value值为menu1-2,节点为{label: '菜单1-2', value: 'menu1-2', children: [],}
+ 
+ 以下方式问题出在哪里?
+ _getTreeNode = (treeData, value) => {
+        // 第二个菜单的节点,获取失败
+        let target = null
+        for (let tree of treeData) {
+            if (tree.value === value) {
+                target = tree
+                // break
+                return target
+            }
+            if (tree.children.length > 0) {
+                // 这里用上面的语句最后获得的undefined,为什么?
+                // target = this._getTreeNode(tree.children, value)
+                target = this._getTreeNode(tree.children, value)
+                console.log('我要打印了=====>>>>33333', target);
+                return
+            }
+        }
+        return target
+    }
