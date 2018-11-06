@@ -1,0 +1,107 @@
+@import '~@hualala/platform-base/lib/styles/variables.less';
+@import '~@hualala/platform-base/lib/styles/mixins.less';
+.searchBox {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    .searchGroup {
+        display: flex;
+        .label, .text {
+            margin-right: 10px;
+            height: 28px;
+            line-height: 28px;
+            box-sizing: border-box;
+        }
+    }
+}
+
+.showReceiptMain {
+    :global{
+        .printReceipt{
+            color: @link-default!important;
+            cursor:pointer;
+        }
+        .ant-tabs-nav-container{
+            height: auto!important;
+        }
+        .ant-tabs-nav-container{
+            border: 0!important;
+            background: none!important;
+        }
+        .ant-tabs-tab-active{
+            background:@white!important;
+            color:@link-default!important;
+        }
+        .ant-tabs-tab{
+            border-left:1px solid @border-color!important;
+            border-top:1px solid @border-color!important;
+            border-right:1px solid @border-color!important;
+            margin-right:3px!important;
+            border-radius: @border-radius-sm!important;
+            height: 30px!important;
+            line-height: 24px!important;
+            min-width:110px!important;
+        }
+    }
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    // .title {
+    //     // border: 1px solid red;
+    // }
+    .operation {
+        >*{
+            margin-left: 10px;
+        }
+    }
+}
+
+.mainTable {
+    :global{
+        // 防止table重影--解决了重影,失去了fixed的效果 TODO:
+        .ant-table-fixed-left{
+            display: none !important;
+        }
+        // 写在这里才能有效覆盖原来的样式；
+        .ant-table-thead > tr.ant-table-row-hover > td,
+        .ant-table-tbody > tr.ant-table-row-hover > td,
+        .ant-table-thead > tr:hover > td,
+        .ant-table-tbody > tr:hover > td{
+            cursor: pointer;
+        }
+        .ant-table-thead > tr.currentRecordClassName.ant-table-row-hover > td,
+        .ant-table-tbody > tr.currentRecordClassName.ant-table-row-hover > td,
+        .ant-table-thead > tr.currentRecordClassName:hover > td,
+        .ant-table-tbody > tr.currentRecordClassName:hover > td{
+            background:rgb(82,160,215);
+            cursor: default;
+        }
+        .currentRecordClassName {
+            background:rgb(82,160,215)!important;
+            color: #fff;
+            a{
+                color: #fff !important;
+            }
+            span{
+                color: #fff !important;
+            }
+        }
+        [disabled]{
+            color: #aeaeae;
+        }
+    }
+}
+.productTable {
+    :global {
+        .ant-table-fixed-left{
+            display: none !important;
+        }
+        .ant-table-pagination {
+            position: relative;
+        }
+    }
+}
