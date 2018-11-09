@@ -1,0 +1,427 @@
+// 2018-08-07  工序管理 by zjy
+import React, { Component } from 'react'
+import registePage from '../../../index'
+import { MES3_PROCESSMANAGEMENT } from '../../../constants/entryCodes'
+import { connect } from 'react-redux'
+import { Modal, Row, Col, Checkbox, Icon } from 'antd'
+import ProcessHeader from './Header'
+import ProcessTable from './Table'
+import Loading from '../../Common/Loading'
+import { onWindowResize, parseUrlParams, onTableFixedResize } from '../../../util'
+import mes_processManagement, { getProcessingRoomList, processUnmount, showModal } from '../../../state/process'
+import AddEdit from './AddEdit'
+function mapStateToProps(store) {
+    return {
+        user: store.user.toJS(),
+        loading: store.mes_processManagement.get('loading'),
+        editModalData: store.mes_processManagement.get('editModalData').toJS(),
+    }
+}
+function mapDispatchToProps(dispatch) {
+    return {
+        processUnmount: (opts) => dispatch(processUnmount(opts)),
+        showModal: (opts) => dispatch(showModal(opts)),
+    }
+}
+@registePage(MES3_PROCESSMANAGEMENT, { mes_processManagement })
+@connect(mapStateToProps, mapDispatchToProps)
+export default class Process extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            tableHeight: '',
+            treeData: [
+                {
+                    label: '菜单1',
+                    value: 'menu1',
+                    children: [
+                        {
+                            label: '菜单1-1',
+                            value: 'menu1-1',
+                            children: [
+                                {
+                                    label: '菜单1-1-1',
+                                    value: 'menu1-1-1',
+                                    children: [],
+                                },
+                                {
+                                    label: '菜单1-1-2',
+                                    value: 'menu1-1-2',
+                                    children: [],
+                                },
+                            ],
+                        },
+                        {
+                            label: '菜单1-2',
+                            value: 'menu1-2',
+                            children: [],
+                        },
+                    ],
+                },
+                {
+                    label: '菜单2',
+                    value: 'menu2',
+                    children: [
+                        {
+                            label: '菜单2-1',
+                            value: 'menu2-1',
+                            children: [],
+                        },
+                        {
+                            label: '菜单2-2',
+                            value: 'menu2-2',
+                            children: [],
+                        },
+                    ],
+                },
+            ],
+        }
+        this.depth = -1
+        this.onMenuClicked = this.onMenuClicked.bind(this);
+    }
+    componentDidMount() {
+        this.resize()
+        window.addEventListener('resize', this.resize)
+        // 从mes导航页面跳转来 弹出弹框 baifan
+        //　新增方式改变　该弹出框写在header里　zjy 20180927
+        // const _editModal = parseUrlParams().edit
+        // const record = {
+        //     title: '新增工序',
+        //     visible: true,
+        //     type: 'add',
+        //     data: {},
+        // }
+        // _editModal && this.props.showModal(record)
+    }
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.resize)
+        this.props.processUnmount()
+    }
+    resize = () => {
+        this.setState({
+            tableHeight: onWindowResize(this.dom, 115),
+        })
+        onTableFixedResize(this.dom)
+
+    }
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.user.activeTabKey === 'sc2.mes3ProcesseManagement' && this.props.user.activeTabKey !== nextProps.user.activeTabKey) {
+            onTableFixedResize(this.dom)
+        }
+    }
+    // onMenuClicked(ev) {
+    //     // 这里是用数据控制好,还是用dom方式呢?
+    //     // 被点击的<h1>
+    //     let node = $(ev.target);
+
+    //     // 属于<h1>的相邻子菜单列表
+    //     let subMenu = node.next();
+
+    //     // 显示/隐藏这个列表
+    //     subMenu.css("display", subMenu.css('display') == "none" ? "block" : "none");
+    // }
+    onMenuClicked(ev) {
+        // 这里是用数据控制好,还是用dom方式呢?
+        // 被点击的<h1>
+        let node = $(ev.target);
+
+        // 属于<h1>的相邻子菜单列表
+        let subMenu = node.parent().siblings();
+
+        // 显示/隐藏这个列表
+        subMenu.css("display", subMenu.css('display') == "none" ? "block" : "none");
+    }
+    onChange = (e, val, isLeaf) => {
+        console.log(e.target.checked, val, isLeaf)
+        /*
+                a.菜单项,
+                    菜单项是否选中
+                        全部命中 ? 父级要选中:父级不选中
+                b.菜单目录 -- 3种样式,子菜单部分选中,勾选,未勾选
+                    是否勾选:
+                        1.勾选
+                            1.1 之前已经有选中项(菜单目录需要程现的样式) 选中,但是没有选全部 => 当前选中,所有子选项选中；
+                            1.2 之前没有选中 => 全部勾选,所有选项选中；
+                        2.取消勾选 => 当前及子选项都取消勾选
+
+        */
+        // 方式1: 传过来层级,如0-1-0 目标数据=>arr[0][1][0] 结合leaf重写数据
+        //  问题: 当前depth的值不正确； -- 暂时无法解决
+        // 方式2: 遍历整个目录树,直接找到对应结点数据 -- 尝试方式2
+
+        // 关键问题: 如何判断父级的选中状态?
+        const { treeData } = this.state
+        this._getTreeNode(treeData, val)
+        let target = this.target
+        const isChecked = e.target.checked
+        this._switchTreeCheck(target, isChecked)
+        console.log('我要打印了=====>>>>handleBySwitch---target', target)
+        console.log('我要打印了=====>>>>handleBySwitch---treeData', treeData);
+        // 替换对应的state上的节点
+        this.setState({
+            treeData: treeData,
+        })
+    }
+    _switchTreeCheck = (tree, isChecked) => {
+        if (tree.children.length > 0) {
+            // 菜单目录--含有子项
+            tree.checked = isChecked
+            for (let child of tree.children) {
+                child.checked = isChecked
+                this._switchTreeCheck(child, isChecked)
+            }
+        } else {
+            // 叶节点
+            tree.checked = isChecked
+            // 找到父级,判断当前同级下的所有节点是否都已经选中 -- 可以在找到目标节点时,如果是叶节点,则找到保存相应的父节点,便于接下来,处理显示； TODO:
+        }
+    }
+    _switchTreeCheck2 = (treeData) => {
+        if (treeData instanceof Array) {
+            for (let tree of treeData) {
+                const children = tree.children
+                if (children.length !== 0) {
+                    let isAllChecked = null
+                    let isNoneChecked = null
+                    isAllChecked = children.all(child=>{
+                        const children = child.children
+                        if (children.length === 0) {
+                            return child.checked === true
+                        }
+                    })
+                    if (isAllChecked) {
+                        tree.checked = 'all'
+                        return
+                    }
+                    isNoneChecked = children.all(child=>{
+                        return child.checked !== true
+                    })
+                    if (isNoneChecked) {
+                        tree.checked = 'none'
+                        return
+                    }
+                    tree.checked = 'part'
+                } else {
+                    this._switchTreeCheck2(tree.children)
+                }
+            }
+        }
+    }
+    _getTreeNode = (treeData, value) => {
+        for (let tree of treeData) {
+            if (tree.value === value) {
+                this.target = tree
+            }
+            if (tree.children.length > 0) {
+                this._getTreeNode(tree.children, value)
+            }
+        }
+    }
+    /**
+     * 递归生成菜单
+     * @param menuObj
+     * @returns {Array}
+     */
+    generateMenu(menuObj) {
+        let vdom = [];
+        // F(n) = f(0) + fn(1) + fn(1) + ... + f(n-1)
+        // f(n) =
+        /*
+            if( n.zz !== array ) {
+                generateLeaf()
+            } else {
+                f(n-1)
+            }
+        */
+        /*
+            对于某一个menu
+            F(n) =
+        */
+        /*
+            <ul>
+                <li>
+                    <h1>menu1</h1>
+                        <ul>
+                            <li>menu1-1</li>
+                            <li>menu1-2</li>
+                            <li>
+                                <h1>menu1-3</h1>
+                                    <ul>
+                                        <li>menu1-3-1</li>
+                                        <li>menu1-3-2</li>
+                                        <li>menu1-3-3</li>
+                                    </ul>
+                            </li>
+                        </ul>
+                </li>
+                <li>menu2</li>
+            </ul>
+        */
+        // 按照作者的思路来写
+        console.log('我要打印了=====>>>>this.depth', this.depth);
+
+        const styleObj = {
+            marginLeft: `${this.depth * 5}px`,
+        }
+        if (menuObj instanceof Array) {
+            for (let menu of menuObj) {
+                let list = []
+                if (menu.children.length === 0) {
+                    list.push(
+                        <li style={styleObj}>
+                            <Checkbox
+                                onChange={(e) => {this.onChange(e, menu.value, true)}}
+                                checked={menu.checked ? true : false}
+                            >
+                                {menu.label}
+                            </Checkbox>
+                        </li>
+                    )
+                } else {
+                    this.depth = this.depth + 1
+                    const styleObj = {
+                        marginLeft: `${this.depth * 5}px`,
+                    }
+                    list.push(
+                        <ul style={styleObj}>
+                            <h1>
+                                <Icon type="caret-right" onClick={this.onMenuClicked}/>
+                                <Checkbox
+                                    checked={menu.checked ? true : false}
+                                    onChange={(e) => {this.onChange(e, menu.value, false)}}
+                                    // onClick={(e)=>{e.stopPropagation()}}\
+                                >
+                                    {menu.label}
+                                </Checkbox>
+                            </h1>
+                            {this.generateMenu(menu.children)}
+                        </ul>
+                    )
+                }
+                vdom.push(list)
+            }
+        }
+        // // 疑问: 终止条件在哪里?
+        // if (menuObj instanceof Array) {
+        //     let list = [];
+        //     // 这个便历隐藏了终止条件；数组为空时,将会自动终止便历,即this.generateMenu(item)不会再执行；
+        //     for (var item of menuObj) {
+        //         list.push(this.generateMenu(item));
+        //     }
+        //     vdom.push(
+        //         <ul key="single">
+        //             {list}
+        //         </ul>
+        //     )
+        // } else {
+        //     vdom.push(
+        //         <li key={menuObj.value}>
+        //             <h1 onClick={this.onMenuClicked}>
+        //                 {menuObj.label}
+        //             </h1>
+        //             {this.generateMenu(menuObj.children)}
+        //         </li>
+        //     )
+        // }
+        console.log(1)
+        return vdom
+    }
+    render() {
+        // const treeData =
+        //     {
+        //         label: '菜单1',
+        //         value: 'menu1',
+        //         children: [
+        //             {
+        //                 label: '菜单1-1',
+        //                 value: 'menu1-1',
+        //                 children: [
+        //                     {
+        //                         label: '菜单1-1-1',
+        //                         value: 'menu1-1-1',
+        //                         children: [],
+        //                     },
+        //                     {
+        //                         label: '菜单1-1-2',
+        //                         value: 'menu1-1-2',
+        //                         children: [],
+        //                     },
+        //                 ],
+        //             },
+        //             {
+        //                 label: '菜单1-2',
+        //                 value: 'menu1-2',
+        //                 children: [],
+        //             },
+        //         ],
+        //     }
+        const data = [
+            {
+                label: '菜单1',
+                value: 'menu1',
+                children: [
+                    {
+                        label: '菜单1-1',
+                        value: 'menu1-1',
+                        children: [
+                            {
+                                label: '菜单1-1-1',
+                                value: 'menu1-1-1',
+                                checked: true,
+                                children: [],
+                            },
+                            {
+                                label: '菜单1-1-2',
+                                value: 'menu1-1-2',
+                                children: [],
+                            },
+                        ],
+                    },
+                    {
+                        label: '菜单1-2',
+                        value: 'menu1-2',
+                        checked: true,
+                        children: [],
+                    },
+                ],
+            },
+            {
+                label: '菜单2',
+                value: 'menu2',
+                children: [
+                    {
+                        label: '菜单2-1',
+                        value: 'menu2-1',
+                        checked: true,
+                        children: [],
+                    },
+                    {
+                        label: '菜单2-2',
+                        value: 'menu2-2',
+                        checked: true,
+                        children: [],
+                    },
+                ],
+            },
+        ]
+        const {  treeData } = this.state
+        return (
+            <Row className="layoutsContainer" ref={(container) => { this.dom = container }}>
+                <Loading loading={this.props.loading} />
+                <ProcessHeader />
+                <Col span={24} className="layoutsLineBlock"></Col>
+                {/* <Col span={24} className="layoutsContent tableClass">
+                    <div>
+                        <ProcessTable tableHeight={this.state.tableHeight} layoutsContainer={this.dom} />
+                    </div>
+                    <div>
+                        {this.props.editModalData.visible && <AddEdit />}
+                    </div>
+                </Col> */}
+                <Col>
+                    {this.generateMenu(treeData)}
+                </Col>
+            </Row>
+        )
+    }
+}
